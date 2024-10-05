@@ -1,4 +1,5 @@
 export type Publisher = {
+  id: string;
   domainName: string;
   niche: string;
   domainRating: number;

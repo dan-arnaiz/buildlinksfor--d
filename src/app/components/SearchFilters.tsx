@@ -59,9 +59,9 @@ export default function SearchFilters({ onFilter }: { onFilter: (queryString: st
 
         <Separator />
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="dr-slider" className="text-xs sm:text-sm font-normal">Domain Rating (DR): {drRange[0]} - {drRange[1]}</Label>
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <Label htmlFor="dr-slider" className="text-sm sm:text-base">Domain Rating (DR): {drRange[0]} - {drRange[1]}</Label>
             <Slider
               id="dr-slider"
               min={0}
@@ -73,8 +73,8 @@ export default function SearchFilters({ onFilter }: { onFilter: (queryString: st
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="da-slider" className="text-xs sm:text-sm font-normal">Domain Authority (DA): {daRange[0]} - {daRange[1]}</Label>
+          <div className="space-y-4">
+            <Label htmlFor="da-slider" className="text-sm sm:text-base">Domain Authority (DA): {daRange[0]} - {daRange[1]}</Label>
             <Slider
               id="da-slider"
               min={0}
@@ -86,8 +86,8 @@ export default function SearchFilters({ onFilter }: { onFilter: (queryString: st
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="spam-slider" className="text-xs sm:text-sm font-normal">Spam Score (SS): {spamScoreRange[0]} - {spamScoreRange[1]}</Label>
+          <div className="space-y-4">
+            <Label htmlFor="spam-slider" className="text-sm sm:text-base">Spam Score (SS): {spamScoreRange[0]} - {spamScoreRange[1]}</Label>
             <Slider
               id="spam-slider"
               min={0}

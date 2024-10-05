@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link"
 import { Home, Package2, BookOpen, Users, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -8,8 +10,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { usePathname } from 'next/navigation'
 
 export default function Sidebar() {
+  const pathname = usePathname()
+
+  const isActive = (path: string) => {
+    return pathname === path ? "bg-muted text-primary" : "text-muted-foreground hover:text-primary"
+  }
+
   return (
     <div className="hidden border-r bg-muted/40 md:block">
       <div className="flex h-full max-h-screen flex-col gap-2">
@@ -23,28 +32,28 @@ export default function Sidebar() {
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
             <Link
               href="/dashboard"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${isActive('/dashboard')}`}
             >
               <Home className="h-4 w-4" />
               Dashboard
             </Link>
             <Link
               href="/publishers"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${isActive('/publishers')}`}
             >
               <BookOpen className="h-4 w-4" />
               Publishers
             </Link>
             <Link
               href="/users"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${isActive('/users')}`}
             >
               <Users className="h-4 w-4" />
               Users
             </Link>
             <Link
               href="/settings"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${isActive('/settings')}`}
             >
               <Settings className="h-4 w-4" />
               Settings

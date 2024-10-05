@@ -115,6 +115,12 @@ interface MultiSelectProps
    * Optional, can be used to add custom styles.
    */
   className?: string;
+
+  /** If true, allows users to create new options */
+  createable?: boolean;
+
+  /** Callback function when a new option is created */
+  onCreateOption?: (inputValue: string) => void;
 }
 
 export const MultiSelect = React.forwardRef<
@@ -133,6 +139,8 @@ export const MultiSelect = React.forwardRef<
       modalPopover = false,
       asChild = false,
       className,
+      createable = false,
+      onCreateOption,
       ...props
     },
     ref
@@ -141,11 +149,21 @@ export const MultiSelect = React.forwardRef<
       React.useState<string[]>(defaultValue);
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
     const [isAnimating, setIsAnimating] = React.useState(false);
+    const [inputValue, setInputValue] = React.useState("");
 
     const handleInputKeyDown = (
       event: React.KeyboardEvent<HTMLInputElement>
     ) => {
       if (event.key === "Enter") {
+        if (createable && inputValue && !options.some(opt => opt.value === inputValue)) {
+          if (onCreateOption) {
+            onCreateOption(inputValue);
+          }
+          const newOption = { label: inputValue, value: inputValue };
+          options.push(newOption);
+          toggleOption(inputValue);
+          setInputValue("");
+        }
         setIsPopoverOpen(true);
       } else if (event.key === "Backspace" && !event.currentTarget.value) {
         const newSelectedValues = [...selectedValues];
@@ -186,6 +204,10 @@ export const MultiSelect = React.forwardRef<
         setSelectedValues(allValues);
         onValueChange(allValues);
       }
+    };
+
+    const handleInputChange = (value: string) => {
+      setInputValue(value);
     };
 
     return (
@@ -287,9 +309,29 @@ export const MultiSelect = React.forwardRef<
             <CommandInput
               placeholder="Search..."
               onKeyDown={handleInputKeyDown}
+              onValueChange={handleInputChange}
+              value={inputValue}
             />
             <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandEmpty>
+                {createable && inputValue ? (
+                  <CommandItem
+                    onSelect={() => {
+                      if (onCreateOption) {
+                        onCreateOption(inputValue);
+                      }
+                      const newOption = { label: inputValue, value: inputValue };
+                      options.push(newOption);
+                      toggleOption(inputValue);
+                      setInputValue("");
+                    }}
+                  >
+                    Create "{inputValue}"
+                  </CommandItem>
+                ) : (
+                  "No results found."
+                )}
+              </CommandEmpty>
               <CommandGroup>
                 <CommandItem
                   key="all"

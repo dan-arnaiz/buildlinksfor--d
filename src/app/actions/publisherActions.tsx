@@ -1,31 +1,52 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+
 import { Publisher } from '../types/Publisher'
-
-// This is a mock database. Replace with your actual database logic.
-let publishers: Publisher[] = []
-
-export async function getPublishers(filterParams: string = ''): Promise<Publisher[]> {
-  // Implement filtering logic here based on filterParams
-  return publishers
+import { supabase } from '../lib/supabase'
+import { revalidatePath } from 'next/cache'
+export async function fetchPublishers(): Promise<Publisher[]> {
+ 
+  const query = supabase.from('Publishers').select('*')
+  console.log("Executing query for Publishers")
+  const { data, error } = await query
+  if (error) {
+    console.error("Error fetching publishers:", error)
+    throw error
+  }
+  console.log("Fetched publishers:", data)
+  return data
 }
+ 
 
 export async function addPublisher(publisher: Omit<Publisher, 'id'>): Promise<Publisher> {
-  const newPublisher = { ...publisher, id: Date.now().toString() }
-  publishers.push(newPublisher)
-  revalidatePath('/')
-  return newPublisher
+  const { data, error } = await supabase
+    .from('Publishers')
+    .insert(publisher)
+    .select()
+    .single()
+
+  if (error) {
+    console.error("Error adding publisher:", error)
+    throw error
+  }
+
+  revalidatePath('/') 
+  return data
 }
 
-export async function updatePublisher(updatedPublisher: Publisher): Promise<Publisher> {
-  publishers = publishers.map(p => p.id === updatedPublisher.id ? updatedPublisher : p)
-  revalidatePath('/')
-  return updatedPublisher
+export async function updatePublisher(publisher: Publisher): Promise<Publisher> {
+  const { data, error } = await supabase
+    .from('Publishers')
+    .update(publisher)
+    .eq('id', publisher.id)
+    .select()
+    .single()
+  if (error) throw error
+  return data
 }
 
 export async function deletePublisher(id: string): Promise<boolean> {
-  publishers = publishers.filter(p => p.id !== id)
-  revalidatePath('/')
+  const { error } = await supabase.from('Publishers').delete().eq('id', id)
+  if (error) throw error
   return true
 }
