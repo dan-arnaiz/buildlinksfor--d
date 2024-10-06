@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Publisher } from '../types/Publisher'
-import { fetchPublishers, addPublisher, updatePublisher, deletePublisher } from '../actions/publisherActions'
+import {  addPublisher, updatePublisher, deletePublisher } from '../actions/publisherActions'
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -133,15 +133,15 @@ const formSchema = z.object({
       (value) => value.every(item => item.trim() !== ""),
       "Empty niche values are not allowed"
     ),
-  domainRating: z.number().min(0).max(100),
-  domainAuthority: z.number().min(0).max(100),
-  domainTraffic: z.number().min(0),
-  spamScore: z.number().min(0).max(100),
-  linkInsertionPrice: z.number().min(0),
-  guestPostPrice: z.number().min(0),
+    domainRating: z.coerce.number().min(0).max(100),
+    domainAuthority: z.coerce.number().min(0).max(100),
+    domainTraffic: z.coerce.number().min(0),
+    spamScore: z.coerce.number().min(0).max(100),
+    linkInsertionPrice: z.coerce.number().min(0),
+    guestPostPrice: z.coerce.number().min(0),
 })
 
-export function DataTable({ initialData, filterParams }: { initialData: Publisher[], filterParams: string }) {
+export function DataTable({ initialData }: { initialData: Publisher[] }) {
   const [data, setData] = useState<Publisher[]>(initialData)
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -183,21 +183,9 @@ export function DataTable({ initialData, filterParams }: { initialData: Publishe
     },
   })
 
-  useEffect(() => {
-    const loadPublishers = async () => {
-      try {
-        const publishers = await fetchPublishers()
-        setData(publishers)
-      } catch (error) {
-        console.error('Error fetching publishers:', error)
-      }
-    }
-    loadPublishers()
-  }, [])
+  
 
-  useEffect(() => {
-    table.getColumn("faviconAndDomain")?.setFilterValue(filterParams)
-  }, [filterParams, table])
+  
 
   useEffect(() => {
     const uniqueNiches = Array.from(new Set(data.flatMap(publisher => publisher.niche.split(',').map(n => n.trim()))))
