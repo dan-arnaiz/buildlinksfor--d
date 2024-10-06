@@ -8,4 +8,11 @@ export type Publisher = {
   spamScore: number;
   linkInsertionPrice: number;
   guestPostPrice: number;
+  linkInsertionGuidelines?: string;
+  guestPostGuidelines?: string;
+  metricsLastUpdate: Date;
+  notes?: string;
+  isReseller: boolean;
+  contactName?: string;
+  contactEmail?: string;
 };

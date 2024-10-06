@@ -19,9 +19,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 
 import { Input } from "@/components/ui/input"
 
-import { PlusIcon, SearchIcon, Edit2Icon, Trash2Icon, MoreHorizontal } from 'lucide-react'
+import { PlusIcon, SearchIcon, Edit2Icon, Trash2Icon,  ArrowUpDown} from 'lucide-react'
 
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel, getSortedRowModel, SortingState, getFilteredRowModel, VisibilityState } from "@tanstack/react-table"
+import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
+import { format } from 'date-fns'
 
 function extractDomainFromUrl(url: string): string {
   if (!url) return '';
@@ -46,7 +49,15 @@ function isValidUrl(string: string) {
 const columns: ColumnDef<Publisher>[] = [
   {
     id: "faviconAndDomain",
-    header: "Domain",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Domain
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     accessorFn: (row: Publisher & { url?: string }) => row.domainName || row.url || '',
     cell: ({ row }) => {
       const value = row.getValue("faviconAndDomain") as string
@@ -62,6 +73,13 @@ const columns: ColumnDef<Publisher>[] = [
             width={16}
             height={16}
             className="mr-2"
+            onError={(e) => {
+              const initials = domainName.slice(0, 2).toUpperCase();
+              const fallbackElement = document.createElement('div');
+              fallbackElement.className = "w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold";
+              fallbackElement.textContent = initials;
+              e.currentTarget.parentNode?.replaceChild(fallbackElement, e.currentTarget);
+            }}
           />
           <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline">
             {domainName}
@@ -70,44 +88,166 @@ const columns: ColumnDef<Publisher>[] = [
       )
     },
     enableHiding: false,
+    enableSorting: true,
+    sortingFn: "alphanumeric",
+    sortDescFirst: false,
   },
   {
     accessorKey: "niche",
-    header: "Niche",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Niche
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({ row }) => {
       const niches = row.getValue("niche") as string;
       return <div className="text-left">{niches.split(',').map(niche => niche.trim()).join(', ')}</div>;
     },
+    enableSorting: true,
   },
   {
     accessorKey: "domainRating",
-    header: "DR",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        DR
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => <div className="text-center">{(row.getValue("domainRating") as number).toFixed(0)}</div>,
+    enableSorting: true,
   },
   {
     accessorKey: "domainAuthority",
-    header: "DA",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        DA
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => <div className="text-center">{(row.getValue("domainAuthority") as number).toFixed(0)}</div>,
+    enableSorting: true,
   },
   {
     accessorKey: "domainTraffic",
-    header: "Traffic",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Traffic
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => <div className="text-center">{(row.getValue("domainTraffic") as number).toLocaleString()}</div>,
+    enableSorting: true,
   },
   {
     accessorKey: "spamScore",
-    header: "Spam Score",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Spam Score
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => <div className="text-center">{row.getValue("spamScore")}%</div>,
+    enableSorting: true,
   },
   {
     accessorKey: "linkInsertionPrice",
-    header: "Link Insertion Price",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Link Insertion Price
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => <div className="text-center">${(row.getValue("linkInsertionPrice") as number).toLocaleString()}</div>,
+    enableSorting: true,
   },
   {
     accessorKey: "guestPostPrice",
-    header: "Guest Post Price",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Guest Post Price
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => <div className="text-center">${(row.getValue("guestPostPrice") as number).toLocaleString()}</div>,
+    enableSorting: true,
+  },
+  {
+    accessorKey: "linkInsertionGuidelines",
+    header: "Link Insertion Guidelines",
+    cell: ({ row }) => (
+      <div className="max-w-[200px] truncate" title={row.getValue("linkInsertionGuidelines")}>
+        {row.getValue("linkInsertionGuidelines")}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "guestPostGuidelines",
+    header: "Guest Post Guidelines",
+    cell: ({ row }) => (
+      <div className="max-w-[200px] truncate" title={row.getValue("guestPostGuidelines")}>
+        {row.getValue("guestPostGuidelines")}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "metricsLastUpdate",
+    header: "Metrics Last Update",
+    cell: ({ row }) => {
+      const metricsLastUpdate = row.getValue("metricsLastUpdate");
+      if (metricsLastUpdate && !isNaN(new Date(metricsLastUpdate as string).getTime())) {
+        return format(new Date(metricsLastUpdate as string), 'yyyy-MM-dd');
+      }
+      return "N/A";
+    },
+  },
+
+  {
+    accessorKey: "isReseller",
+    header: "Reseller",
+    cell: ({ row }) => (row.getValue("isReseller") ? "Yes" : "No"),
+  },
+  {
+    accessorKey: "contactName",
+    header: "Contact Name",
+    cell: ({ row }) => <div>{row.getValue("contactName")}</div>,
+  },
+  {
+    accessorKey: "contactEmail",
+    header: "Contact Email",
+    cell: ({ row }) => <div>{row.getValue("contactEmail")}</div>,
+  },
+  {
+    accessorKey: "notes",
+    header: "Notes",
+    cell: ({ row }) => (
+      <div className="max-w-[200px] truncate" title={row.getValue("notes")}>
+        {row.getValue("notes")}
+      </div>
+    ),
   },
   {
     id: "actions",
@@ -122,6 +262,7 @@ const columns: ColumnDef<Publisher>[] = [
       </div>
     ),
     enableHiding: false,
+    enableSorting: false,
   },
 ]
 
@@ -151,6 +292,13 @@ const formSchema = z.object({
     spamScore: z.coerce.number().min(0).max(100),
     linkInsertionPrice: z.coerce.number().min(0),
     guestPostPrice: z.coerce.number().min(0),
+    linkInsertionGuidelines: z.string().optional(),
+    guestPostGuidelines: z.string().optional(),
+    metricsLastUpdate: z.date(),
+    notes: z.string().optional(),
+    isReseller: z.boolean(),
+    contactName: z.string().min(1, "Contact name is required"),
+    contactEmail: z.string().email("Invalid email address"),
 })
 
 export function DataTable({ initialData }: { initialData: Publisher[] }) {
@@ -176,6 +324,13 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
       spamScore: 0,
       linkInsertionPrice: 0,
       guestPostPrice: 0,
+      linkInsertionGuidelines: "",
+      guestPostGuidelines: "",
+      metricsLastUpdate: new Date(),
+      notes: "",
+      isReseller: false,
+      contactName: "",
+      contactEmail: "",
     },
   })
 
@@ -195,7 +350,6 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
       globalFilter,
     },
   })
-
   
 
   
@@ -263,6 +417,13 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
       spamScore: publisher.spamScore,
       linkInsertionPrice: publisher.linkInsertionPrice,
       guestPostPrice: publisher.guestPostPrice,
+      linkInsertionGuidelines: publisher.linkInsertionGuidelines || '',
+      guestPostGuidelines: publisher.guestPostGuidelines || '',
+      metricsLastUpdate: new Date(publisher.metricsLastUpdate),
+      notes: publisher.notes || '',
+      isReseller: publisher.isReseller,
+      contactName: publisher.contactName || '',
+      contactEmail: publisher.contactEmail || '',
     })
     setIsFormOpen(true)
   }
@@ -340,13 +501,13 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
     <div>
       <div className="flex justify-between items-center mb-2">
         <div className="flex items-center space-x-2">
-          <div className="relative max-w-md">
+          <div className="relative max-w-lg">
             <SearchIcon className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             <Input
               placeholder="Search..."
               value={globalFilter ?? ""}
               onChange={(event) => setGlobalFilter(event.target.value)}
-              className="pl-8 w-full"
+              className="pl-8 w-full min-w-[350px]"
             />
           </div>
         </div>
@@ -397,7 +558,7 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
                         <FormLabel className="text-sm font-medium">Niche</FormLabel>
                         <FormControl>
                           <MultiSelect
-                            options={niches.map(niche => ({ label: niche, value: niche }))}
+                            options={niches.map(niche => ({ label: niche, value: niche })).sort((a, b) => a.label.localeCompare(b.label))}
                             {...field}
                             onValueChange={(value) => field.onChange(value)}
                             placeholder="Select or add niches..."
@@ -405,7 +566,7 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
                             onCreateOption={(inputValue) => {
                               const newNiche = inputValue.trim()
                               if (newNiche && !niches.includes(newNiche)) {
-                                setNiches(prev => [...prev, newNiche])
+                                setNiches(prev => [...prev, newNiche].sort())
                               }
                             }}
                           />
@@ -434,6 +595,7 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
                               {...formField} 
                               type="number"
                               className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary"
+                              value={formField.value as string | number | readonly string[] | undefined}
                             />
                           </FormControl>
                           <FormMessage className="text-xs text-red-500" />
@@ -441,6 +603,104 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
                       )}
                     />
                   ))}
+                         <FormField
+                    control={form.control}
+                    name="contactName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contact Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="contactEmail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="email" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="linkInsertionGuidelines"
+                    render={({ field }) => (
+                      <FormItem className="col-span-full">
+                        <FormLabel>Link Insertion Guidelines</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} className="min-h-[100px]" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="guestPostGuidelines"
+                    render={({ field }) => (
+                      <FormItem className="col-span-full">
+                        <FormLabel>Guest Post Guidelines</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} className="min-h-[100px]" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="metricsLastUpdate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Metrics Last Update</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={e => field.onChange(new Date(e.target.value))} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                
+                  <FormField
+                    control={form.control}
+                    name="isReseller"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Reseller</FormLabel>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            defaultChecked={false}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                    <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem className="col-span-full">
+                        <FormLabel>Notes</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} className="min-h-[100px]" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+           
                 </div>
                 <div className="flex justify-end mt-6 space-x-2">
                   <Button type="button" variant="outline" onClick={handleCloseForm}>
@@ -459,29 +719,26 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="ml-2">View</span>
+              Columns
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[200px]">
-            <div className="px-3 py-2 text-sm font-semibold">Toggle Columns</div>
+          <DropdownMenuContent align="end">
             {table
               .getAllColumns()
-              .filter((column) => column.getCanHide())
+              .filter(
+                (column) => column.getCanHide()
+              )
               .map((column) => {
                 return (
                   <DropdownMenuCheckboxItem
                     key={column.id}
-                    className="px-3 py-2 flex items-center space-x-2"
+                    className="capitalize"
                     checked={column.getIsVisible()}
                     onCheckedChange={(value) =>
                       column.toggleVisibility(!!value)
                     }
                   >
-                    <div className="w-4">
-                      {column.getIsVisible() }
-                    </div>
-                    <span>{column.columnDef.header as string}</span>
+                    {column.id.split(/(?=[A-Z])/).join(' ').replace(/^\w/, c => c.toUpperCase())}
                   </DropdownMenuCheckboxItem>
                 )
               })}

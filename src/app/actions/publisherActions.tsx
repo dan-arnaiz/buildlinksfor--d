@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 import { revalidatePath } from 'next/cache'
 export async function fetchPublishers(): Promise<Publisher[]> {
  
-  const query = supabase.from('Publishers').select('*')
+  const query = supabase.from('Publishers').select('*').order('domainName', { ascending: true })
   console.log("Executing query for Publishers")
   const { data, error } = await query
   if (error) {

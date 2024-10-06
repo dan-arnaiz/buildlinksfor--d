@@ -40,6 +40,7 @@ export default function Publishers() {
       const spamScoreMax = parseInt(params.get('spamScoreMax') || '100', 10)
       const trafficMin = parseInt(params.get('trafficMin') || '0', 10)
       const trafficMax = parseInt(params.get('trafficMax') || '100000000', 10)
+      const isReseller = params.get('isReseller')
 
       const filtered = publishers.filter(publisher => {
         const publisherNiches = publisher.niche.split(',').map(n => n.trim())
@@ -48,7 +49,8 @@ export default function Publishers() {
         const matchesDa = publisher.domainAuthority >= daMin && publisher.domainAuthority <= daMax
         const matchesSpamScore = publisher.spamScore >= spamScoreMin && publisher.spamScore <= spamScoreMax
         const matchesTraffic = publisher.domainTraffic >= trafficMin && publisher.domainTraffic <= trafficMax
-        return matchesNiche && matchesDr && matchesDa && matchesSpamScore && matchesTraffic
+        const matchesReseller = isReseller === 'all' || publisher.isReseller === (isReseller === 'true')
+        return matchesNiche && matchesDr && matchesDa && matchesSpamScore && matchesTraffic && matchesReseller 
       })
       setFilteredPublishers(filtered)
     } else {
@@ -56,27 +58,26 @@ export default function Publishers() {
     }
   }, [publishers, filterParams])
 
-  console.log(filteredPublishers)
-  console.log(filterParams)
+ 
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Publishers</h1>
-      <div className="grid gap-6 md:grid-cols-4">
-        <div className="md:col-span-1">
+    <div className="p-4 sm:p-6">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Publishers</h1>
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+        <div className="w-full lg:w-1/4">
           <SearchFilters onFilter={setFilterParams} />
         </div>
-        <div className="md:col-span-3">
+        <div className="w-full lg:w-3/4">
           {loading ? (
             <div className="space-y-4">
               <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
                 {[...Array(8)].map((_, index) => (
                   <div key={index} className="h-10 bg-gray-200 rounded animate-pulse"></div>
                 ))}
               </div>
               {[...Array(5)].map((_, rowIndex) => (
-                <div key={rowIndex} className="grid grid-cols-6 gap-4">
+                <div key={rowIndex} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
                   {[...Array(6)].map((_, colIndex) => (
                     <div key={colIndex} className="h-8 bg-gray-100 rounded animate-pulse"></div>
                   ))}
