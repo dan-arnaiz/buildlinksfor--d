@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-
+import { useToast } from "@/hooks/use-toast"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
@@ -97,7 +97,7 @@ const columns: ColumnDef<Publisher>[] = [
   {
     accessorKey: "spamScore",
     header: "Spam Score",
-    cell: ({ row }) => <div className="text-center">{row.getValue("spamScore")}</div>,
+    cell: ({ row }) => <div className="text-center">{row.getValue("spamScore")}%</div>,
   },
   {
     accessorKey: "linkInsertionPrice",
@@ -126,7 +126,19 @@ const columns: ColumnDef<Publisher>[] = [
 ]
 
 const formSchema = z.object({
-  domainName: z.string().min(1, "Domain name is required"),
+  domainName: z.string()
+  .min(1, "Domain name is required")
+  .transform(value => {
+    // Remove http://, https://, www., and trailing slash
+    return value.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+  })
+  .refine(
+    (value) => {
+      const domainPattern = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+      return domainPattern.test(value);
+    },
+    "Invalid domain name format. It should be domainname.com"
+  ),
   niche: z.array(z.string())
     .min(1, "At least one niche is required")
     .refine(
@@ -151,6 +163,7 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
   const [niches, setNiches] = useState<string[]>([])
   const [publisherToDelete, setPublisherToDelete] = useState<Publisher | null>(null)
   const router = useRouter()
+  const { toast } = useToast()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -194,9 +207,7 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
 
   const handleAddPublisher = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Clean up and flatten the niche array
       const cleanedNiches = values.niche.flatMap(niche => {
-        // If the niche is a stringified array, parse it
         if (niche.startsWith('[') && niche.endsWith(']')) {
           try {
             return JSON.parse(niche);
@@ -205,14 +216,22 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
           }
         }
         return niche;
-      }).filter(Boolean); // Remove any empty strings
+      }).filter(Boolean);
 
-      // Remove duplicates and join into a string
       const nicheString = Array.from(new Set(cleanedNiches)).join(',');
-      
+
       const publisherData = {
         ...values,
         niche: nicheString,
+      }
+    
+      const isDuplicate = data.some(publisher => publisher.domainName === publisherData.domainName);
+      if (isDuplicate) {
+        toast({
+          title: "Error",
+          description: "Publisher already exists in the list",
+        });
+        return;
       }
 
       const addedPublisher = await addPublisher(publisherData)
@@ -220,8 +239,16 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
       setIsFormOpen(false)
       form.reset()
       router.refresh()
+      toast({
+        title: "Success",
+        description: "Publisher added successfully",
+      })
     } catch (error) {
       console.error('Error adding publisher:', error)
+      toast({
+        title: "Error",
+        description: "Failed to add publisher",
+      })
     }
   }
 
@@ -243,7 +270,19 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
   const handleUpdatePublisher = async (values: z.infer<typeof formSchema>) => {
     if (editingPublisher) {
       try {
-        const nicheString = Array.isArray(values.niche) ? values.niche.join(',') : values.niche
+        const cleanedNiches = values.niche.flatMap(niche => {
+          if (niche.startsWith('[') && niche.endsWith(']')) {
+            try {
+              return JSON.parse(niche);
+            } catch {
+              return niche;
+            }
+          }
+          return niche;
+        }).filter(Boolean);
+
+        const nicheString = Array.from(new Set(cleanedNiches)).join(',');
+
         const updatedPublisher = await updatePublisher({ 
           ...editingPublisher, 
           ...values,
@@ -253,11 +292,22 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
         setEditingPublisher(null)
         setIsFormOpen(false)
         router.refresh()
+        form.reset()
+        toast({
+          title: "Success",
+          description: "Publisher updated successfully",
+        })
       } catch (error) {
         console.error('Error updating publisher:', error)
+        toast({
+          title: "Error",
+          description: "Failed to update publisher",
+        })
       }
     }
   }
+
+  
 
   const handleDeletePublisher = async () => {
     if (publisherToDelete) {
@@ -266,8 +316,16 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
         setData(data.filter(p => p.id !== publisherToDelete.id))
         setPublisherToDelete(null)
         router.refresh()
+        toast({
+          title: "Success",
+          description: "Publisher deleted successfully",
+        })
       } catch (error) {
         console.error('Error deleting publisher:', error)
+        toast({
+          title: "Error",
+          description: "Failed to delete publisher",
+        })
       }
     }
   }
@@ -313,15 +371,22 @@ export function DataTable({ initialData }: { initialData: Publisher[] }) {
                     name="domainName"
                     render={({ field }) => (
                       <FormItem className="col-span-full">
-                        <FormLabel className="text-sm font-medium">Domain Name</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary"
-                          />
-                        </FormControl>
-                        <FormMessage className="text-xs text-red-500" />
-                      </FormItem>
+                      <FormLabel className="text-sm font-medium">Domain Name</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary"
+                          onChange={(e) => {
+                            const formattedValue = e.target.value
+                              .replace(/^(https?:\/\/)?(www\.)?/, '')
+                              .replace(/\/$/, '');
+                            field.onChange(formattedValue);
+                          }}
+                          placeholder="example.com"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs text-red-500" />
+                    </FormItem>
                     )}
                   />
                   <FormField

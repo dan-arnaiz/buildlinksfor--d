@@ -71,12 +71,12 @@ export default function SearchFilters({ onFilter }: { onFilter: (queryString: st
   };
 
   return (
-    <Card className="w-full mx-auto">
+    <Card className="w-full mx-auto p-4">
       <CardHeader>
-        <CardTitle className="text-xl sm:text-2xl font-bold">Search Filters</CardTitle>
+        <CardTitle className="text-lg sm:text-xl font-bold">Search Filters</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 sm:space-y-6">
-        <div className="space-y-2">
+      <CardContent className="space-y-3 sm:space-y-4">
+        <div className="space-y-1">
           <Label htmlFor="niche-select" className="text-sm sm:text-base">Niches</Label>
           <MultiSelect
             id="niche-select"
@@ -90,15 +90,15 @@ export default function SearchFilters({ onFilter }: { onFilter: (queryString: st
 
         <Separator />
 
-        <div className="space-y-2">
-          <Label htmlFor="traffic-slider" className="text-sm sm:text-base">Traffic</Label>
+        <div className="space-y-4">
+          <Label htmlFor="traffic-slider" className="text-sm sm:text-base">Ahref Traffic</Label>
           <div className="flex items-center space-x-2 justify-end">
             <span>Min:</span>
             <Input
               type="text"
               value={trafficRange[0].toLocaleString()}
               onChange={(e) => handleTrafficInputChange(0, e.target.value.replace(/,/g, ''))}
-              className="w-24"
+              className="w-20"
               onFocus={(e) => e.target.select()}
             />
             <span>Max:</span>
@@ -106,7 +106,7 @@ export default function SearchFilters({ onFilter }: { onFilter: (queryString: st
               type="text"
               value={trafficRange[1].toLocaleString()}
               onChange={(e) => handleTrafficInputChange(1, e.target.value.replace(/,/g, ''))}
-              style={{ width: `${trafficRange[1].toLocaleString().length + 2}ch` }}
+              style={{ width: `${trafficRange[1].toLocaleString().length + 2}ch`, minWidth: '8ch' }}
               onFocus={(e) => e.target.select()}
             />
           </div>
@@ -121,8 +121,8 @@ export default function SearchFilters({ onFilter }: { onFilter: (queryString: st
           />
         </div>
 
-        <div className="space-y-8">
-          <div className="space-y-4">
+        <div className="space-y-6">
+          <div className="space-y-3">
             <Label htmlFor="dr-slider" className="text-sm sm:text-base">Domain Rating (DR): {drRange[0]} - {drRange[1]}</Label>
             <Slider
               id="dr-slider"
@@ -135,7 +135,7 @@ export default function SearchFilters({ onFilter }: { onFilter: (queryString: st
             />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Label htmlFor="da-slider" className="text-sm sm:text-base">Domain Authority (DA): {daRange[0]} - {daRange[1]}</Label>
             <Slider
               id="da-slider"
@@ -148,7 +148,7 @@ export default function SearchFilters({ onFilter }: { onFilter: (queryString: st
             />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Label htmlFor="spam-slider" className="text-sm sm:text-base">Spam Score (SS): {spamScoreRange[0]} - {spamScoreRange[1]}</Label>
             <Slider
               id="spam-slider"
@@ -161,7 +161,7 @@ export default function SearchFilters({ onFilter }: { onFilter: (queryString: st
             />
           </div>
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-end pt-4">
           <Button onClick={handleClearFilters}>Clear Filters</Button>
         </div>
       </CardContent>
