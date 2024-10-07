@@ -85,7 +85,7 @@ export default function Publishers() {
             setIsExpanded={setIsFiltersExpanded}
           />
         </div>
-        <div className={`w-full overflow-x-auto ${isFiltersExpanded ? '' : 'mt-4'}`}>
+        <div className={`w-full overflow-x-auto ${isFiltersExpanded ? '' : 'mt-0'}`}>
           {loading ? (
             <div className="space-y-4">
               <div className="h-8 bg-gray-200 rounded animate-pulse"></div>

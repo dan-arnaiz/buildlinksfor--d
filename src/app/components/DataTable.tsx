@@ -59,7 +59,7 @@ const columns: ColumnDef<Publisher>[] = [
         className="w-[250px] justify-start"
       >
         Domain
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
       </Button>
     ),
     accessorFn: (row: Publisher & { url?: string }) => row.domainName || row.url || '',
@@ -70,22 +70,24 @@ const columns: ColumnDef<Publisher>[] = [
       const url = isValidUrl(value) ? value : `https://${domainName}`
 
       return (
-        <div className="flex items-center space-x-2">
-          <Image
-            src={faviconUrl}
-            alt={`${domainName} favicon`}
-            width={16}
-            height={16}
-            className="mr-2"
-            onError={(e) => {
-              const initials = domainName.slice(0, 2).toUpperCase();
-              const fallbackElement = document.createElement('div');
-              fallbackElement.className = "w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold";
-              fallbackElement.textContent = initials;
-              e.currentTarget.parentNode?.replaceChild(fallbackElement, e.currentTarget);
-            }}
-          />
-          <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+        <div className="flex items-center">
+          <div className="w-4 h-4 mr-2 flex items-center justify-center">
+            <Image
+              src={faviconUrl}
+              alt={`${domainName} favicon`}
+              width={16}
+              height={16}
+              className="max-w-full max-h-full object-contain"
+              onError={(e) => {
+                const initials = domainName.slice(0, 2).toUpperCase();
+                const fallbackElement = document.createElement('div');
+                fallbackElement.className = "w-full h-full bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold";
+                fallbackElement.textContent = initials;
+                e.currentTarget.parentNode?.replaceChild(fallbackElement, e.currentTarget);
+              }}
+            />
+          </div>
+          <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline ml-2">
             {domainName}
           </a>
         </div>
@@ -98,18 +100,16 @@ const columns: ColumnDef<Publisher>[] = [
   },
   {
     accessorKey: "niche",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="w-[120px] justify-start"
-        >
-          Niche
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="w-[120px] justify-start"
+      >
+        Niche
+        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+      </Button>
+    ),
     cell: ({ row }) => {
       const niches = row.getValue("niche") as string;
       return <div className="text-left">{niches.split(',').map(niche => niche.trim()).join(', ')}</div>;
@@ -125,7 +125,7 @@ const columns: ColumnDef<Publisher>[] = [
         className="w-[80px]"
       >
         DR
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
       </Button>
     ),
     cell: ({ row }) => <div className="text-center">{(row.getValue("domainRating") as number).toFixed(0)}</div>,
@@ -140,7 +140,7 @@ const columns: ColumnDef<Publisher>[] = [
         className="w-[80px]"
       >
         DA
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
       </Button>
     ),
     cell: ({ row }) => <div className="text-center">{(row.getValue("domainAuthority") as number).toFixed(0)}</div>,
@@ -155,7 +155,7 @@ const columns: ColumnDef<Publisher>[] = [
         className="w-[120px]"
       >
         Traffic
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
       </Button>
     ),
     cell: ({ row }) => <div className="text-center">{(row.getValue("domainTraffic") as number).toLocaleString()}</div>,
@@ -170,7 +170,7 @@ const columns: ColumnDef<Publisher>[] = [
         className="w-[120px]"
       >
         Spam Score
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
       </Button>
     ),
     cell: ({ row }) => <div className="text-center">{row.getValue("spamScore")}%</div>,
@@ -185,7 +185,7 @@ const columns: ColumnDef<Publisher>[] = [
         className="w-[180px]"
       >
         Link Insertion Price
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
       </Button>
     ),
     cell: ({ row }) => <div className="text-center">${(row.getValue("linkInsertionPrice") as number).toLocaleString()}</div>,
@@ -200,7 +200,7 @@ const columns: ColumnDef<Publisher>[] = [
         className="w-[160px]"
       >
         Guest Post Price
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
       </Button>
     ),
     cell: ({ row }) => <div className="text-center">${(row.getValue("guestPostPrice") as number).toLocaleString()}</div>,
@@ -208,25 +208,50 @@ const columns: ColumnDef<Publisher>[] = [
   },
   {
     accessorKey: "linkInsertionGuidelines",
-    header: "Link Insertion Guidelines",
+    header: () => (
+      <Button
+        variant="ghost"
+        className="w-[200px]"
+      >
+        Link Insertion Guidelines
+      </Button>
+    ),
     cell: ({ row }) => (
       <div className="max-w-[200px] truncate" title={row.getValue("linkInsertionGuidelines")}>
         {row.getValue("linkInsertionGuidelines")}
       </div>
     ),
+    enableSorting: false,
   },
   {
     accessorKey: "guestPostGuidelines",
-    header: "Guest Post Guidelines",
+    header: () => (
+      <Button
+        variant="ghost"
+        className="w-[200px]"
+      >
+        Guest Post Guidelines
+      </Button>
+    ),
     cell: ({ row }) => (
       <div className="max-w-[200px] truncate" title={row.getValue("guestPostGuidelines")}>
         {row.getValue("guestPostGuidelines")}
       </div>
     ),
+    enableSorting: false,
   },
   {
     accessorKey: "metricsLastUpdate",
-    header: "Metrics Last Update",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="w-[160px]"
+      >
+        Metrics Last Update
+        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+      </Button>
+    ),
     cell: ({ row }) => {
       const metricsLastUpdate = row.getValue("metricsLastUpdate");
       if (metricsLastUpdate && !isNaN(new Date(metricsLastUpdate as string).getTime())) {
@@ -238,34 +263,73 @@ const columns: ColumnDef<Publisher>[] = [
       }
       return <div className="max-w-[100px]">N/A</div>;
     },
+    enableSorting: true,
   },
   {
     accessorKey: "isReseller",
-    header: "Reseller",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="w-[100px]"
+      >
+        Reseller
+        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+      </Button>
+    ),
     cell: ({ row }) => (
       <div className="text-center">
         {row.getValue("isReseller") ? "Yes" : "No"}
       </div>
     ),
+    enableSorting: true,
   },
   {
     accessorKey: "contactName",
-    header: "Contact Name",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="w-[140px]"
+      >
+        Contact Name
+        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+      </Button>
+    ),
     cell: ({ row }) => <div className="w-[110px] text-center">{row.getValue("contactName")}</div>,
+    enableSorting: true,
   },
   {
     accessorKey: "contactEmail",
-    header: "Contact Email",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="w-[180px]"
+      >
+        Contact Email
+        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+      </Button>
+    ),
     cell: ({ row }) => <div className="text-start">{row.getValue("contactEmail")}</div>,
+    enableSorting: true,
   },
   {
     accessorKey: "notes",
-    header: "Notes",
+    header: () => (
+      <Button
+        variant="ghost"
+        className="w-[200px]"
+      >
+        Notes
+      </Button>
+    ),
     cell: ({ row }) => (
       <div className="max-w-[200px] truncate" title={row.getValue("notes")}>
         {row.getValue("notes")}
       </div>
     ),
+    enableSorting: false,
   },
   {
     id: "actions",
