@@ -112,7 +112,7 @@ export default function SearchFilters({ onFilter, isExpanded, setIsExpanded }: S
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-4">
-        <Card className="w-full mx-auto p-3 sm:p-4 lg:p-6 bg-gray-50">
+        <Card className="w-full mx-auto p-3 sm:p-4 lg:p-6 ">
           <CardContent className="space-y-3 sm:space-y-4">
             <div className="space-y-1">
               <Label htmlFor="niche-select" className="text-xs">Niches</Label>

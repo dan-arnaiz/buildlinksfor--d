@@ -3,6 +3,7 @@ import Header from './components/Header'
 import Sidebar from './components/Sidebar'
 import './globals.css'
 import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from '@/components/ui/theme-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} bg-background min-h-screen`}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
           <Sidebar />
           <div className="flex flex-col overflow-x-auto">
@@ -30,7 +32,8 @@ export default function RootLayout({
               <Toaster />
             </main>
           </div>
-        </div>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -81,7 +81,7 @@ const columns: ColumnDef<Publisher>[] = [
               onError={(e) => {
                 const initials = domainName.slice(0, 2).toUpperCase();
                 const fallbackElement = document.createElement('div');
-                fallbackElement.className = "w-full h-full bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold";
+                fallbackElement.className = "w-full h-full  rounded-full flex items-center justify-center text-xs font-bold";
                 fallbackElement.textContent = initials;
                 e.currentTarget.parentNode?.replaceChild(fallbackElement, e.currentTarget);
               }}
@@ -776,7 +776,7 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen }: { initialD
                   <Button type="button" variant="outline" onClick={handleCloseForm}>
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-primary text-white hover:bg-primary-dark transition-colors px-6 py-2 rounded-md">
+                  <Button type="submit" className="transition-colors px-6 py-2 rounded-md">
                     {editingPublisher ? 'Update' : 'Save'}
                   </Button>
                 </div>
@@ -829,7 +829,7 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen }: { initialD
       <div className="relative">
         <div className="rounded-md border">
           <Table>
-            <TableHeader className="bg-gray-100">
+            <TableHeader >
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header, index) => (

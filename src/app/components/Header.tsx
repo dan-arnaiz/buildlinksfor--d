@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Sidebar from "./Sidebar"
+import { ModeToggle } from "@/components/ui/mode-tonggle"
 
 export default function Header() {
   return (
@@ -35,6 +36,7 @@ export default function Header() {
         <Bell className="h-4 w-4" />
         <span className="sr-only">Toggle notifications</span>
       </Button>
+      <ModeToggle />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" size="icon" className="rounded-full">

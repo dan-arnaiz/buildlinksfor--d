@@ -74,7 +74,7 @@ export default function Publishers() {
     <div className="p-4 sm:p-6">
       <div className="flex justify-between items-center mb-4 sm:mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold">Publishers</h1>
-        <Button onClick={() => setIsFormOpen(true)} className="bg-primary text-white hover:bg-primary-dark transition-colors">
+        <Button onClick={() => setIsFormOpen(true)} className="hover:bg-primary-dark transition-colors">
           <PlusIcon className="mr-2 h-4 w-4" /> Add Publisher
         </Button>
       </div>
