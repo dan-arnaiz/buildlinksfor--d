@@ -7,6 +7,7 @@ import { fetchPublishers } from '../actions/publisherActions'
 import { Publisher } from '../types/Publisher'
 import { Button } from '@/components/ui/button'
 import { PlusIcon } from 'lucide-react'
+import Loading from '@/components/ui/loading'
 
 export default function Publishers() {
   const [filterParams, setFilterParams] = useState('')
@@ -87,20 +88,8 @@ export default function Publishers() {
         </div>
         <div className={`w-full overflow-x-auto ${isFiltersExpanded ? '' : 'mt-0'}`}>
           {loading ? (
-            <div className="space-y-4">
-              <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4">
-                {[...Array(8)].map((_, index) => (
-                  <div key={index} className="h-10 bg-gray-200 rounded animate-pulse"></div>
-                ))}
-              </div>
-              {[...Array(5)].map((_, rowIndex) => (
-                <div key={rowIndex} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4">
-                  {[...Array(6)].map((_, colIndex) => (
-                    <div key={colIndex} className="h-8 bg-gray-100 rounded animate-pulse"></div>
-                  ))}
-                </div>
-              ))}
+            <div className="flex items-center justify-center h-full">
+              <Loading />
             </div>
           ) : (
             <DataTable initialData={filteredPublishers} key={JSON.stringify(filteredPublishers)} isFormOpen={isFormOpen} setIsFormOpen={setIsFormOpen} />
