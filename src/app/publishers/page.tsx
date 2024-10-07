@@ -16,7 +16,7 @@ export default function Publishers() {
   const [loading, setLoading] = useState(true)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(true)
-
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   useEffect(() => {
     const loadPublishers = async () => {
       try {
@@ -31,7 +31,11 @@ export default function Publishers() {
       }
     }
     loadPublishers()
-  }, [])
+  }, [refreshTrigger])
+
+  const handleDataChange = () => {
+    setRefreshTrigger(prev => prev + 1);
+  }
 
   useEffect(() => {
     if (filterParams) {
@@ -92,7 +96,7 @@ export default function Publishers() {
               <Loading />
             </div>
           ) : (
-            <DataTable initialData={filteredPublishers} key={JSON.stringify(filteredPublishers)} isFormOpen={isFormOpen} setIsFormOpen={setIsFormOpen} />
+            <DataTable initialData={filteredPublishers} key={JSON.stringify(filteredPublishers)} isFormOpen={isFormOpen} setIsFormOpen={setIsFormOpen} onDataChange={handleDataChange} />
           )}
         </div>
       </div>

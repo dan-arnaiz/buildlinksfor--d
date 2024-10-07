@@ -331,21 +331,7 @@ const columns: ColumnDef<Publisher>[] = [
     ),
     enableSorting: false,
   },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="flex justify-end space-x-2">
-        <Button variant="ghost" size="icon" onClick={() => handleEditPublisher(row.original)}>
-          <Edit2Icon className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={() => handleDeletePublisher(row.original.id)}>
-          <Trash2Icon className="h-4 w-4" />
-        </Button>
-      </div>
-    ),
-    enableHiding: false,
-    enableSorting: false,
-  },
+
 ]
 
 const formSchema = z.object({
@@ -383,7 +369,7 @@ const formSchema = z.object({
     contactEmail: z.string().email("Invalid email address"),
 })
 
-export function DataTable({ initialData, isFormOpen, setIsFormOpen }: { initialData: Publisher[], isFormOpen: boolean, setIsFormOpen: (isFormOpen: boolean) => void }) {
+export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataChange }: { initialData: Publisher[], isFormOpen: boolean, setIsFormOpen: (isFormOpen: boolean) => void, onDataChange: () => void }) {
   const [data, setData] = useState<Publisher[]>(initialData)
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -475,6 +461,7 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen }: { initialD
       setIsFormOpen(false)
       form.reset()
       router.refresh()
+      onDataChange()
       toast({
         title: "Success",
         description: "Publisher added successfully",
@@ -536,6 +523,7 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen }: { initialD
         setIsFormOpen(false)
         router.refresh()
         form.reset()
+        onDataChange()
         toast({
           title: "Success",
           description: "Publisher updated successfully",
@@ -559,6 +547,7 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen }: { initialD
         setData(data.filter(p => p.id !== publisherToDelete.id))
         setPublisherToDelete(null)
         router.refresh()
+        onDataChange()
         toast({
           title: "Success",
           description: "Publisher deleted successfully",
