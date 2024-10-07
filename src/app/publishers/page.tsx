@@ -5,12 +5,16 @@ import SearchFilters from '../components/SearchFilters'
 import DataTable from '../components/DataTable'
 import { fetchPublishers } from '../actions/publisherActions'
 import { Publisher } from '../types/Publisher'
+import { Button } from '@/components/ui/button'
+import { PlusIcon } from 'lucide-react'
 
 export default function Publishers() {
   const [filterParams, setFilterParams] = useState('')
   const [publishers, setPublishers] = useState<Publisher[]>([])
   const [filteredPublishers, setFilteredPublishers] = useState<Publisher[]>([])
   const [loading, setLoading] = useState(true)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(true)
 
   useEffect(() => {
     const loadPublishers = async () => {
@@ -41,6 +45,8 @@ export default function Publishers() {
       const trafficMin = parseInt(params.get('trafficMin') || '0', 10)
       const trafficMax = parseInt(params.get('trafficMax') || '100000000', 10)
       const isReseller = params.get('isReseller')
+      const metricsLastUpdateStart = params.get('metricsLastUpdateStart')
+      const metricsLastUpdateEnd = params.get('metricsLastUpdateEnd')
 
       const filtered = publishers.filter(publisher => {
         const publisherNiches = publisher.niche.split(',').map(n => n.trim())
@@ -50,7 +56,10 @@ export default function Publishers() {
         const matchesSpamScore = publisher.spamScore >= spamScoreMin && publisher.spamScore <= spamScoreMax
         const matchesTraffic = publisher.domainTraffic >= trafficMin && publisher.domainTraffic <= trafficMax
         const matchesReseller = isReseller === 'all' || publisher.isReseller === (isReseller === 'true')
-        return matchesNiche && matchesDr && matchesDa && matchesSpamScore && matchesTraffic && matchesReseller 
+        const matchesMetricsLastUpdate = metricsLastUpdateStart && metricsLastUpdateEnd
+          ? new Date(publisher.metricsLastUpdate) >= new Date(metricsLastUpdateStart) && new Date(publisher.metricsLastUpdate) <= new Date(metricsLastUpdateEnd)
+          : true
+        return matchesNiche && matchesDr && matchesDa && matchesSpamScore && matchesTraffic && matchesReseller && matchesMetricsLastUpdate
       })
       setFilteredPublishers(filtered)
     } else {
@@ -58,26 +67,35 @@ export default function Publishers() {
     }
   }, [publishers, filterParams])
 
- 
+  console.log(filterParams)
 
   return (
     <div className="p-4 sm:p-6">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Publishers</h1>
-      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
-        <div className="w-full lg:w-1/4">
-          <SearchFilters onFilter={setFilterParams} />
+      <div className="flex justify-between items-center mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold">Publishers</h1>
+        <Button onClick={() => setIsFormOpen(true)} className="bg-primary text-white hover:bg-primary-dark transition-colors">
+          <PlusIcon className="mr-2 h-4 w-4" /> Add Publisher
+        </Button>
+      </div>
+      <div className={`flex ${isFiltersExpanded ? 'flex-col lg:flex-row' : 'flex-col gap-1 sm:gap-1'} gap-2 sm:gap-4`}>
+        <div className={`${isFiltersExpanded ? 'w-full lg:w-[300px] mt-4' : 'w-full'}  transition-all duration-300 ease-in-out`}>
+          <SearchFilters 
+            onFilter={setFilterParams} 
+            isExpanded={isFiltersExpanded}
+            setIsExpanded={setIsFiltersExpanded}
+          />
         </div>
-        <div className="w-full lg:w-3/4">
+        <div className={`w-full overflow-x-auto ${isFiltersExpanded ? '' : 'mt-4'}`}>
           {loading ? (
             <div className="space-y-4">
               <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4">
                 {[...Array(8)].map((_, index) => (
                   <div key={index} className="h-10 bg-gray-200 rounded animate-pulse"></div>
                 ))}
               </div>
               {[...Array(5)].map((_, rowIndex) => (
-                <div key={rowIndex} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
+                <div key={rowIndex} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4">
                   {[...Array(6)].map((_, colIndex) => (
                     <div key={colIndex} className="h-8 bg-gray-100 rounded animate-pulse"></div>
                   ))}
@@ -85,7 +103,7 @@ export default function Publishers() {
               ))}
             </div>
           ) : (
-            <DataTable initialData={filteredPublishers} key={JSON.stringify(filteredPublishers)} />
+            <DataTable initialData={filteredPublishers} key={JSON.stringify(filteredPublishers)} isFormOpen={isFormOpen} setIsFormOpen={setIsFormOpen} />
           )}
         </div>
       </div>
