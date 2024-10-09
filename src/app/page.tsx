@@ -1,14 +1,16 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-
-
+import Loading from '@/components/ui/loading'
 
 const Dashboard = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {/* Loading Skeleton */}
+       <Loading title="Loading Dashboard" showProgressBar={false} />
+        
         {/* Summary Cards */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -62,7 +64,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <p className="text-sm">• New campaign created: "Summer Sale"</p>
+              <p className="text-sm">• New campaign created: Summer Sale</p>
               <p className="text-sm">• Link clicked: product/summer-tshirt</p>
               <p className="text-sm">• New user registered: john@example.com</p>
             </div>
@@ -75,4 +77,3 @@ const Dashboard = () => {
 }
 
 export default Dashboard
-

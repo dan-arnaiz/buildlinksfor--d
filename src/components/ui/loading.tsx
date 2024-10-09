@@ -3,83 +3,193 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
-export default function Loading() {
+interface LoadingProps {
+  title?: string;
+  subtitle?: string;
+  expectedDuration?: number;
+  primaryColor?: string;
+  secondaryColor?: string;
+  showProgressBar?: boolean;
+}
+
+export default function Loading({
+  title = "Loading Data",
+  subtitle = "Please wait...",
+  expectedDuration = 30000,
+  primaryColor = "hsl(var(--primary))",
+  showProgressBar = true,
+}: LoadingProps) {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
+    if (!showProgressBar) return;
+
+    const startTime = Date.now()
+
     const timer = setInterval(() => {
-      setProgress((prevProgress) => (prevProgress >= 100 ? 0 : prevProgress + 10))
-    }, 500)
+      const elapsedTime = Date.now() - startTime
+      const newProgress = Math.min((elapsedTime / expectedDuration) * 100, 100)
+      setProgress(newProgress)
+
+      if (newProgress >= 100) {
+        clearInterval(timer)
+      }
+    }, 100)
 
     return () => clearInterval(timer)
-  }, [])
+  }, [expectedDuration, showProgressBar])
 
-  const dataFlowVariants = {
-    hidden: { pathLength: 0, opacity: 0 },
-    visible: (i: number) => ({
-      pathLength: 1,
-      opacity: 1,
-      transition: {
-        pathLength: { delay: i * 0.5, type: "spring", duration: 1.5, bounce: 0 },
-        opacity: { delay: i * 0.5, duration: 0.01 }
-      }
-    })
-  }
+
 
   return (
-    <div className="flex flex-col items-center justify-center  bg-background">
+    <div className="flex flex-col items-center justify-center bg-background">
       <motion.svg
         xmlns="http://www.w3.org/2000/svg"
         width="200"
-        height="100"
-        viewBox="0 0 200 100"
+        height="200"
+        viewBox="0 0 200 200"
         className="mb-4"
       >
-        <motion.path
-          d="M10 50 L90 50"
-          stroke="hsl(var(--primary))"
-          strokeWidth="4"
-          strokeLinecap="round"
-          fill="none"
-          variants={dataFlowVariants}
-          initial="hidden"
-          animate="visible"
-          custom={0}
-        />
-        <motion.path
-          d="M110 50 L190 50"
-          stroke="hsl(var(--primary))"
-          strokeWidth="4"
-          strokeLinecap="round"
-          fill="none"
-          variants={dataFlowVariants}
-          initial="hidden"
-          animate="visible"
-          custom={1}
-        />
+        {/* Network nodes */}
+        {[...Array(8)].map((_, i) => {
+          const angle = (i / 8) * Math.PI * 2;
+          const cx = 100 + Math.cos(angle) * 70;
+          const cy = 100 + Math.sin(angle) * 70;
+
+          return (
+            <motion.circle
+              key={i}
+              cx={cx}
+              cy={cy}
+              r="5"
+              fill={primaryColor}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{
+                duration: 0.5,
+                delay: i * 0.1,
+              }}
+            />
+          );
+        })}
+
+        {/* Connecting links */}
+        {[...Array(8)].map((_, i) => {
+          const startAngle = (i / 8) * Math.PI * 2;
+          const endAngle = ((i + 1) / 8) * Math.PI * 2;
+          const startX = 100 + Math.cos(startAngle) * 70;
+          const startY = 100 + Math.sin(startAngle) * 70;
+          const endX = 100 + Math.cos(endAngle) * 70;
+          const endY = 100 + Math.sin(endAngle) * 70;
+
+          return (
+            <motion.line
+              key={i}
+              x1={startX}
+              y1={startY}
+              x2={endX}
+              y2={endY}
+              stroke={primaryColor}
+              strokeWidth="1"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 0.5 }}
+              transition={{
+                duration: 1,
+                delay: i * 0.1,
+              }}
+            />
+          );
+        })}
+
+        {/* Random links to/from nodes or central node */}
+        {[...Array(5)].map((_, i) => {
+          const isFromCentral = Math.random() > 0.5;
+          const startNodeIndex = Math.floor(Math.random() * 8);
+          const endNodeIndex = Math.floor(Math.random() * 8);
+          const startAngle = (startNodeIndex / 8) * Math.PI * 2;
+          const endAngle = (endNodeIndex / 8) * Math.PI * 2;
+          const startX = isFromCentral ? 100 : 100 + Math.cos(startAngle) * 70;
+          const startY = isFromCentral ? 100 : 100 + Math.sin(startAngle) * 70;
+          const endX = isFromCentral ? 100 + Math.cos(endAngle) * 70 : 100;
+          const endY = isFromCentral ? 100 + Math.sin(endAngle) * 70 : 100;
+
+          return (
+            <motion.line
+              key={`random-${i}`}
+              x1={startX}
+              y1={startY}
+              x2={endX}
+              y2={endY}
+              stroke={primaryColor}
+              strokeWidth="1"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 0.3 }}
+              transition={{
+                duration: 1.5,
+                delay: i * 0.2 + 1,
+                repeat: Infinity,
+                repeatType: "reverse",
+                repeatDelay: Math.random() * 2 + 1,
+              }}
+            />
+          );
+        })}
+
+        {/* Central node */}
         <motion.circle
           cx="100"
-          cy="50"
-          r="10"
-          fill="hsl(var(--primary))"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 1, type: "spring", stiffness: 500, damping: 15 }}
+          cy="100"
+          r="8"
+          fill={primaryColor}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{
+            duration: 0.5,
+            delay: 0.8,
+          }}
+        />
+
+        {/* Pulsating effect */}
+        <motion.circle
+          cx="100"
+          cy="100"
+          r="40"
+          fill="none"
+          stroke={primaryColor}
+          strokeWidth="1"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1.2, opacity: 0.2 }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            repeatType: "reverse",
+          }}
         />
       </motion.svg>
-      <h2 className="text-2xl font-bold text-primary mb-2">Loading Data</h2>
-      <p className="text-sm text-muted-foreground mb-4">Please wait...</p>
-      <div className="w-64 h-2 bg-secondary rounded-full overflow-hidden">
-        <motion.div
-          className="h-full bg-primary"
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.5 }}
-        />
-      </div>
-      <p className="mt-2 text-sm text-muted-foreground" aria-live="polite">
-        {progress}% complete
-      </p>
+      <h2 className="text-2xl font-bold text-primary mb-2">{title}</h2>
+      <p className="text-sm text-muted-foreground mb-4">{subtitle}</p>
+      {showProgressBar && (
+        <>
+          <div className="w-64 h-3 bg-secondary rounded-full overflow-hidden shadow-inner">
+            <motion.div
+              className="h-full rounded-full"
+              style={{ 
+                backgroundColor: primaryColor,
+                boxShadow: `0 0 10px ${primaryColor}80`
+              }}
+              initial={{ width: '0%', x: '-100%' }}
+              animate={{ width: `${progress}%`, x: '0%' }}
+              transition={{ 
+                duration: 0.5,
+                ease: "easeInOut"
+              }}
+            />
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground" aria-live="polite">
+            {Math.round(progress)}% complete
+          </p>
+        </>
+      )}
     </div>
   )
 }

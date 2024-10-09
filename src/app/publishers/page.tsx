@@ -15,7 +15,7 @@ export default function Publishers() {
   const [filteredPublishers, setFilteredPublishers] = useState<Publisher[]>([])
   const [loading, setLoading] = useState(true)
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [isFiltersExpanded, setIsFiltersExpanded] = useState(true)
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   useEffect(() => {
     const loadPublishers = async () => {
@@ -92,7 +92,7 @@ export default function Publishers() {
         </div>
         <div className={`w-full overflow-x-auto ${isFiltersExpanded ? '' : 'mt-0'}`}>
           {loading ? (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center h-full min-h-[200px] sm:min-h-[300px] md:min-h-[400px] lg:min-h-[500px]">
               <Loading />
             </div>
           ) : (
