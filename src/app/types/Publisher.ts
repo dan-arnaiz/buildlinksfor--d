@@ -5,7 +5,10 @@ export type Publisher = {
   domainRating: number;
   domainAuthority: number;
   domainTraffic: number;
+  trafficLocation: string;
+  acceptsGreyNiche: boolean;
   spamScore: number;
+  currency: string;
   linkInsertionPrice: number;
   guestPostPrice: number;
   linkInsertionGuidelines?: string;

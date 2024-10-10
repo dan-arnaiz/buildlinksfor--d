@@ -45,6 +45,7 @@ export default function Publishers() {
       const drMax = parseInt(params.get('drMax') || '100', 10)
       const daMin = parseInt(params.get('daMin') || '0', 10)
       const daMax = parseInt(params.get('daMax') || '100', 10)
+      const trafficLocation = params.get('trafficLocation')
       const spamScoreMin = parseInt(params.get('spamScoreMin') || '0', 10)
       const spamScoreMax = parseInt(params.get('spamScoreMax') || '100', 10)
       const trafficMin = parseInt(params.get('trafficMin') || '0', 10)
@@ -64,7 +65,12 @@ export default function Publishers() {
         const matchesMetricsLastUpdate = metricsLastUpdateStart && metricsLastUpdateEnd
           ? new Date(publisher.metricsLastUpdate) >= new Date(metricsLastUpdateStart) && new Date(publisher.metricsLastUpdate) <= new Date(metricsLastUpdateEnd)
           : true
-        return matchesNiche && matchesDr && matchesDa && matchesSpamScore && matchesTraffic && matchesReseller && matchesMetricsLastUpdate
+       const matchesTrafficLocation = trafficLocation === '' || 
+         (trafficLocation && publisher.trafficLocation && 
+          trafficLocation.split(',').some(location => 
+            publisher.trafficLocation.includes(location.trim())
+          ))
+        return matchesNiche && matchesDr && matchesDa && matchesSpamScore && matchesTraffic && matchesReseller && matchesMetricsLastUpdate && matchesTrafficLocation
       })
       setFilteredPublishers(filtered)
     } else {
@@ -83,7 +89,7 @@ export default function Publishers() {
         </Button>
       </div>
       <div className={`flex ${isFiltersExpanded ? 'flex-col lg:flex-row' : 'flex-col gap-1 sm:gap-1'} gap-2 sm:gap-4`}>
-        <div className={`${isFiltersExpanded ? 'w-full lg:w-[300px] mt-4' : 'w-full'}  transition-all duration-300 ease-in-out`}>
+        <div className={`${isFiltersExpanded ? 'w-full lg:w-[300px] mt-4 flex-shrink-0' : 'w-full'}  transition-all duration-300 ease-in-out`}>
           <SearchFilters 
             onFilter={setFilterParams} 
             isExpanded={isFiltersExpanded}
