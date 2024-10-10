@@ -17,12 +17,6 @@ import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, A
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu"
-import { 
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
 
 
 import { Input } from "@/components/ui/input"
@@ -35,7 +29,7 @@ import { Switch } from "@/components/ui/switch"
 import { format } from 'date-fns'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { currencies } from '../api/publishers/currencies'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 
 function extractDomainFromUrl(url: string): string {
   if (!url) return '';
@@ -175,10 +169,10 @@ const columns: ColumnDef<Publisher>[] = [
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[120px]"
+        className="w-[120px] flex items-center justify-between"
       >
         Traffic Location
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div className="text-center">{row.getValue("trafficLocation")}</div>,
@@ -211,7 +205,7 @@ const columns: ColumnDef<Publisher>[] = [
         {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
       </Button>
     ),
-    cell: ({ row }) => <div className="text-center">{row.getValue("currency" )}{(row.getValue("linkInsertionPrice") as number).toLocaleString()}</div>,
+    cell: ({ row }) => <div className="text-center">{row.original.currency || ""}{(row.getValue("linkInsertionPrice") as number).toLocaleString()}</div>,
     enableSorting: true,
   },
   {
@@ -226,7 +220,7 @@ const columns: ColumnDef<Publisher>[] = [
         {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
       </Button>
     ),
-    cell: ({ row }) => <div className="text-center">{row.getValue("currency")}{(row.getValue("guestPostPrice") as number).toLocaleString()}</div>,
+    cell: ({ row }) => <div className="text-center">{row.original.currency || ""}{(row.getValue("guestPostPrice") as number).toLocaleString()}</div>,
     enableSorting: true,
   },
   {
@@ -521,7 +515,7 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataChang
         ...values,
         niche: nicheString,
       }
-    
+  
       const isDuplicate = data.some(publisher => publisher.domainName === publisherData.domainName);
       if (isDuplicate) {
         toast({
@@ -531,12 +525,12 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataChang
         return;
       }
 
-      const addedPublisher = await addPublisher(
-        {          ...publisherData,
-          trafficLocation: publisherData.trafficLocation || "",
-          acceptsGreyNiche: publisherData.acceptsGreyNiche || false,
-        }
-      )
+      const addedPublisher = await addPublisher({
+        ...publisherData,
+        trafficLocation: publisherData.trafficLocation || "",
+        acceptsGreyNiche: publisherData.acceptsGreyNiche || false,
+        currency: publisherData.currency || "",
+      })
       setData([...data, addedPublisher])
       setIsFormOpen(false)
       form.reset()
@@ -596,6 +590,15 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataChang
 
         const nicheString = Array.from(new Set(cleanedNiches)).join(',');
 
+        const isDuplicate = data.some(publisher => publisher.domainName === values.domainName && publisher.id !== editingPublisher.id);
+        if (isDuplicate) {
+          toast({
+            title: "Error",
+            description: "Publisher already exists in the list",
+          });
+          return;
+        }
+
         const updatedPublisher = await updatePublisher({ 
           ...editingPublisher, 
           ...values,
@@ -623,7 +626,6 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataChang
       }
     }
   }
-
   
 
   const handleDeletePublisher = async () => {
@@ -1067,23 +1069,26 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataChang
             </TableBody>
           </Table>
         </div>
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
+        <div className="flex items-center justify-between py-4">
+          <p className="text-sm text-gray-500 italic">Note: Metrics date may not be up to date. Please double-check.</p>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
       <AlertDialog open={!!publisherToDelete} onOpenChange={(isOpen) => !isOpen && setPublisherToDelete(null)}>
