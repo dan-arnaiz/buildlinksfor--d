@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Publisher } from '../types/Publisher'
-import {  addPublisher, updatePublisher, deletePublisher, fetchPublishers } from '../actions/publisherActions'
+import { Publisher } from '../../types/Publisher'
+import {  addPublisher, updatePublisher, deletePublisher, fetchPublishers } from '../../actions/publisherActions'
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -29,7 +29,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { format } from 'date-fns'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { currencies } from '../api/publishers/currencies'
+import { currencies } from '../../api/publishers/currencies'
 import { Card } from '@/components/ui/card'
 
 function extractDomainFromUrl(url: string): string {

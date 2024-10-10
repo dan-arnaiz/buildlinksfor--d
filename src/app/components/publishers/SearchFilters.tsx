@@ -14,7 +14,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import { MultiSelect } from "@/components/ui/multi-select"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { fetchPublishers } from '../actions/publisherActions'
+import { fetchPublishers } from '../../actions/publisherActions'
 
 interface SearchFiltersProps {
   onFilter: (params: string) => void

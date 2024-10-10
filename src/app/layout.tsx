@@ -1,6 +1,6 @@
 import { Inter } from 'next/font/google'
-import Header from './components/Header'
-import Sidebar from './components/Sidebar'
+import Header from './components/layout/Header'
+import Sidebar from './components/layout/Sidebar'
 import './globals.css'
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from '@/components/ui/theme-provider'

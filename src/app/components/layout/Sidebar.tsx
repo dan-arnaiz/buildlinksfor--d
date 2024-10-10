@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link"
-import { Home, Package2, BookOpen, Users, Settings } from "lucide-react"
+import { Home, Package2, BookOpen, Users, Settings, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -36,6 +36,13 @@ export default function Sidebar() {
             >
               <Home className="h-4 w-4" />
               Dashboard
+            </Link>
+            <Link
+              href="/domains"
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${isActive('/domains')}`}
+            >
+              <Globe className="h-4 w-4" />
+              Domains
             </Link>
             <Link
               href="/publishers"

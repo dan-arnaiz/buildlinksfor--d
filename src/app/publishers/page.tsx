@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import SearchFilters from '../components/SearchFilters'
-import DataTable from '../components/DataTable'
+import SearchFilters from '../components/publishers/SearchFilters'
+import DataTable from '../components/publishers/DataTable'
 import { fetchPublishers } from '../actions/publisherActions'
 import { Publisher } from '../types/Publisher'
 import { Button } from '@/components/ui/button'
