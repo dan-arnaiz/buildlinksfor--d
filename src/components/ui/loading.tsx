@@ -20,6 +20,7 @@ export default function Loading({
   showProgressBar = true,
 }: LoadingProps) {
   const [progress, setProgress] = useState(0)
+  const [randomLinks, setRandomLinks] = useState<number[][]>([])
 
   useEffect(() => {
     if (!showProgressBar) return;
@@ -39,6 +40,20 @@ export default function Loading({
     return () => clearInterval(timer)
   }, [expectedDuration, showProgressBar])
 
+  // Generate random links only on the client side
+  useEffect(() => {
+    const generateRandomLinks = () => {
+      const links = [...Array(5)].map(() => {
+        const isFromCentral = Math.random() > 0.5;
+        const startNodeIndex = Math.floor(Math.random() * 8);
+        const endNodeIndex = Math.floor(Math.random() * 8);
+        return [isFromCentral, startNodeIndex, endNodeIndex];
+      });
+      setRandomLinks(links);
+    };
+
+    generateRandomLinks();
+  }, []); // Runs once on component mount
 
 
   return (
@@ -102,10 +117,8 @@ export default function Loading({
         })}
 
         {/* Random links to/from nodes or central node */}
-        {[...Array(5)].map((_, i) => {
-          const isFromCentral = Math.random() > 0.5;
-          const startNodeIndex = Math.floor(Math.random() * 8);
-          const endNodeIndex = Math.floor(Math.random() * 8);
+        {randomLinks.map((link, i) => {
+          const [isFromCentral, startNodeIndex, endNodeIndex] = link;
           const startAngle = (startNodeIndex / 8) * Math.PI * 2;
           const endAngle = (endNodeIndex / 8) * Math.PI * 2;
           const startX = isFromCentral ? 100 : 100 + Math.cos(startAngle) * 70;

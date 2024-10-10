@@ -17,11 +17,13 @@ export default function Publishers() {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+
   useEffect(() => {
     const loadPublishers = async () => {
       try {
         setLoading(true)
-        const data = await fetchPublishers()
+        const data = await fetchPublishers(refreshTrigger > 0)
         setPublishers(data)
         setFilteredPublishers(data)
       } catch (error) {
@@ -33,9 +35,11 @@ export default function Publishers() {
     loadPublishers()
   }, [refreshTrigger])
 
-  const handleDataChange = () => {
+   const onDataTableRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
   }
+
+
 
   useEffect(() => {
     if (filterParams) {
@@ -78,8 +82,6 @@ export default function Publishers() {
     }
   }, [publishers, filterParams])
 
-  console.log(filterParams)
-
   return (
     <div className="p-4 sm:p-6">
       <div className="flex justify-between items-center mb-4 sm:mb-6">
@@ -102,7 +104,7 @@ export default function Publishers() {
               <Loading />
             </div>
           ) : (
-            <DataTable initialData={filteredPublishers} key={JSON.stringify(filteredPublishers)} isFormOpen={isFormOpen} setIsFormOpen={setIsFormOpen} onDataChange={handleDataChange} />
+            <DataTable initialData={filteredPublishers} key={JSON.stringify(filteredPublishers)} isFormOpen={isFormOpen} setIsFormOpen={setIsFormOpen}  onDataTableRefresh={onDataTableRefresh} />
           )}
         </div>
       </div>
