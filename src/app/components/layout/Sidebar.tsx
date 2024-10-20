@@ -1,88 +1,155 @@
 "use client";
 
-import Link from "next/link"
-import { Home, Package2, BookOpen, Users, Settings, Globe } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { usePathname } from 'next/navigation'
+  Home,
+  Package2,
+  BookOpen,
+  Users,
+  Settings,
+  Globe,
+  ChevronLeft,
+  ChevronRight,
+  LogOut,
+  CreditCard,
+  Bell,
+  Zap,
+  ChevronsUpDown,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { ModeToggle } from "@/components/ui/mode-tonggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
-export default function Sidebar() {
-  const pathname = usePathname()
+export function AppSidebar() {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const pathname = usePathname();
 
-  const isActive = (path: string) => {
-    return pathname === path ? "bg-muted text-primary" : "text-muted-foreground hover:text-primary"
-  }
+  const isActive = (path: string) => pathname === path;
+
+  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+
+  const menuItems = [
+    { href: "/", icon: Home, label: "Dashboard" },
+    { href: "/domains", icon: Globe, label: "Domains" },
+    { href: "/publishers", icon: BookOpen, label: "Publishers" },
+    { href: "/users", icon: Users, label: "Users" },
+    { href: "/settings", icon: Settings, label: "Settings" },
+  ];
 
   return (
-    <div className="hidden border-r bg-muted/40 md:block">
-      <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <Package2 className="h-6 w-6" />
-            <span className="">Publisher DB</span>
+    <div
+      className={cn(
+        "flex flex-col bg-background border-r transition-all duration-300",
+        isCollapsed ? "w-16" : "w-64"
+      )}
+    >
+      <div className="flex items-center h-14 px-4 border-b justify-between lg:h-[60px]">
+        {!isCollapsed && (
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-semibold text-sm"
+          >
+            <Package2 className="h-5 w-5" />
+            <span>Publisher DB</span>
           </Link>
-        </div>
-        <div className="flex-1">
-          <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-            <Link
-              href="/"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${isActive('/')}`}
-            >
-              <Home className="h-4 w-4" />
-              Dashboard
-            </Link>
-            <Link
-              href="/domains"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${isActive('/domains')}`}
-            >
-              <Globe className="h-4 w-4" />
-              Domains
-            </Link>
-            <Link
-              href="/publishers"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${isActive('/publishers')}`}
-            >
-              <BookOpen className="h-4 w-4" />
-              Publishers
-            </Link>
-            <Link
-              href="/users"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${isActive('/users')}`}
-            >
-              <Users className="h-4 w-4" />
-              Users
-            </Link>
-            <Link
-              href="/settings"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${isActive('/settings')}`}
-            >
-              <Settings className="h-4 w-4" />
-              Settings
-            </Link>
-          </nav>
-        </div>
-        <div className="mt-auto p-4">
-          <Card>
-            <CardHeader className="p-2 pt-0 md:p-4">
-              <CardTitle>Upgrade to Pro</CardTitle>
-              <CardDescription>
-                Unlock all features and get unlimited access to our support team.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
-              <Button size="sm" className="w-full">
-                Upgrade
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
+          className="h-8 w-8"
+        >
+          {isCollapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+      <nav className="flex-1 overflow-y-auto py-4">
+        <ul className="space-y-1 px-2">
+          {menuItems.map(({ href, icon: Icon, label }) => (
+            <li key={href}>
+              <Link
+                href={href}
+                className={cn(
+                  "flex items-center gap-3 rounded-md px-3 py-2 transition-colors text-sm",
+                  isActive(href)
+                    ? "bg-secondary text-secondary-foreground font-medium"
+                    : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground",
+                  isCollapsed && "justify-center"
+                )}
+                title={isCollapsed ? label : undefined}
+              >
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                {!isCollapsed && <span>{label}</span>}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div className="border-t p-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="w-full justify-start px-2">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src="/avatars/user-avatar.jpg"
+                    alt="User avatar"
+                    width={32}
+                    height={32}
+                  />
+                  <AvatarFallback>JD</AvatarFallback>
+                </Avatar>
+                {!isCollapsed && (
+                  <div className="flex flex-col items-start">
+                    <p className="text-sm font-medium leading-none">John Doe</p>
+                    <p className="text-xs text-muted-foreground">
+                      john.doe@example.com
+                    </p>
+                  </div>
+                )}
+                {!isCollapsed && (
+                  <ChevronsUpDown className="ml-auto h-4 w-4 opacity-50" />
+                )}
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Profile Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Bell className="mr-2 h-4 w-4" />
+              <span>Notifications</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <CreditCard className="mr-2 h-4 w-4" />
+              <span>Billing</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Zap className="mr-2 h-4 w-4" />
+              <span>Upgrade Plan</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
-  )
+  );
 }
