@@ -23,6 +23,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { PlusIcon, Pencil, Trash2, Eye, Globe } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -38,6 +39,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Textarea } from "@/components/ui/textarea";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,49 +58,19 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { formSchema } from "@/app/types/Domains";
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Domain name is required")
-    .transform((value) => {
-      return value.replace(/^(https?:\/\/)?(www\.)?/, "").replace(/\/$/, "");
-    })
-    .refine((value) => {
-      const domainPattern = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
-      return domainPattern.test(value);
-    }, "Invalid domain name format. It should be domainname.com"),
-  niches: z
-    .array(z.string())
-    .min(1, "At least one niche is required")
-    .refine(
-      (value) => value.every((item) => item.trim() !== ""),
-      "Empty niche values are not allowed"
-    ),
-  keywords: z
-    .array(z.string())
-    .min(1, "At least one keyword is required")
-    .refine(
-      (value) => value.every((item) => item.trim() !== ""),
-      "Empty keyword values are not allowed"
-    ),
-  notes: z.string().optional(),
-  seoMetricsRequirements: z.object({
-    minDomainRating: z.number().min(0).max(100),
-    minDomainAuthority: z.number().min(0).max(100),
-    minDomainTraffic: z.number().min(0),
-    otherRequirements: z.string().optional(),
-  }),
-});
-
-const DomainList: React.FC = () => {
+export default function DomainList() {
   const [domains, setDomains] = useState<Domain[]>([]);
+  const [filteredDomains, setFilteredDomains] = useState<Domain[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDomain, setEditingDomain] = useState<Domain | null>(null);
   const [niches, setNiches] = useState<string[]>([]);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [domainToDelete, setDomainToDelete] = useState<Domain | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+  const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -107,6 +79,7 @@ const DomainList: React.FC = () => {
       name: "",
       niches: [],
       keywords: [],
+      archived: false,
       notes: "",
       seoMetricsRequirements: {
         minDomainRating: 0,
@@ -120,6 +93,10 @@ const DomainList: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    filterDomains();
+  }, [domains, showArchived, selectedNiches]);
 
   const fetchData = async () => {
     const fetchedDomains = await fetchDomains();
@@ -144,6 +121,19 @@ const DomainList: React.FC = () => {
     setKeywords(uniqueKeywords);
   };
 
+  const filterDomains = () => {
+    let filtered = domains;
+    if (!showArchived) {
+      filtered = filtered.filter((domain) => !domain.archived);
+    }
+    if (selectedNiches.length > 0) {
+      filtered = filtered.filter((domain) =>
+        selectedNiches.some((niche) => domain.niches.includes(niche))
+      );
+    }
+    setFilteredDomains(filtered);
+  };
+
   const handleOpenDialog = (domain?: Domain) => {
     setEditingDomain(domain || null);
     if (domain) {
@@ -151,6 +141,7 @@ const DomainList: React.FC = () => {
         name: domain.name,
         niches: domain.niches.split(","),
         keywords: domain.keywords.split(","),
+        archived: domain.archived,
         notes: domain.notes || "",
         seoMetricsRequirements: {
           minDomainRating: domain.seoMetricsRequirements?.minDomainRating || 0,
@@ -167,6 +158,7 @@ const DomainList: React.FC = () => {
         name: "",
         niches: [],
         keywords: [],
+        archived: false,
         notes: "",
         seoMetricsRequirements: {
           minDomainRating: 0,
@@ -240,6 +232,7 @@ const DomainList: React.FC = () => {
       } else {
         const newDomain = await addDomain({
           ...domainData,
+          archived: false,
           notes: domainData.notes || "",
         });
         setDomains([...domains, newDomain]);
@@ -283,6 +276,32 @@ const DomainList: React.FC = () => {
           <span className="hidden sm:inline mr-0">Add Domain</span>
         </Button>
       </div>
+      <div className="flex flex-col sm:flex-row justify-end mb-4 space-y-4 sm:space-y-0">
+        <fieldset className="border rounded px-4 py-2 w-full sm:w-auto">
+          <legend className="text-xs font-semibold px-1">Filter</legend>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <MultiSelect
+              options={niches.map((niche) => ({ label: niche, value: niche }))}
+              value={selectedNiches}
+              onValueChange={setSelectedNiches}
+              placeholder="Select niches"
+              className="w-full sm:w-auto"
+            />
+            <div className="flex items-center">
+              <Switch
+                checked={showArchived}
+                onCheckedChange={setShowArchived}
+                id="show-archived"
+                className="mr-2"
+              />
+              <label htmlFor="show-archived" className="text-xs">
+                Archived
+              </label>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
           className="sm:max-w-[425px] md:max-w-[550px] p-6"
@@ -473,6 +492,29 @@ const DomainList: React.FC = () => {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="archived"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel
+                            className={`text-sm font-bold ${
+                              field.value ? "text-red-500" : ""
+                            }`}
+                          >
+                            Archived
+                          </FormLabel>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 </fieldset>
               </Card>
               <div className="flex justify-end space-x-4">
@@ -539,8 +581,8 @@ const DomainList: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {domains.length > 0 ? (
-              domains.map((domain) => (
+            {filteredDomains.length > 0 ? (
+              filteredDomains.map((domain) => (
                 <ContextMenu key={domain.id}>
                   <ContextMenuTrigger asChild>
                     <TableRow>
@@ -649,5 +691,3 @@ const DomainList: React.FC = () => {
     </div>
   );
 };
-
-export default DomainList;
