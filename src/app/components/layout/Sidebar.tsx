@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -17,6 +17,16 @@ import {
   Bell,
   Zap,
   ChevronsUpDown,
+  Search,
+  Link as LinkIcon,
+  Users2,
+  Loader2,
+  Loader2Icon,
+  LoaderCircle,
+  LoaderCircleIcon,
+  LoaderPinwheelIcon,
+  Ellipsis,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
@@ -29,9 +39,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { progress } from "framer-motion";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 export function AppSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [openPopover, setOpenPopover] = useState<string | null>(null);
+  const [openCollapsible, setOpenCollapsible] = useState<string | null>(null);
   const pathname = usePathname();
 
   const isActive = (path: string) => pathname === path;
@@ -40,11 +63,46 @@ export function AppSidebar() {
 
   const menuItems = [
     { href: "/", icon: Home, label: "Dashboard" },
-    { href: "/domains", icon: Globe, label: "Domains" },
+    {
+      href: "#",
+      icon: Users2,
+      label: "Clients",
+      subItems: [
+        {
+          href: "/domains",
+          icon: Globe,
+          label: "Domains",
+        },
+        {
+          href: "/domains/find-publisher",
+          icon: Search,
+          label: "Find Publishers",
+        },
+        {
+          href: "/on-progress",
+          icon: Ellipsis,
+          label: "On Progress",
+        },
+        { href: "/domains/live-links", icon: LinkIcon, label: "Live Links" },
+      ],
+    },
     { href: "/publishers", icon: BookOpen, label: "Publishers" },
     { href: "/users", icon: Users, label: "Users" },
     { href: "/settings", icon: Settings, label: "Settings" },
   ];
+
+  const isParentActive = (item: any) => {
+    if (item.subItems) {
+      return item.subItems.some((subItem: any) => isActive(subItem.href));
+    }
+    return isActive(item.href);
+  };
+
+  useEffect(() => {
+    if (!isCollapsed) {
+      setOpenPopover(null);
+    }
+  }, [isCollapsed]);
 
   return (
     <div
@@ -78,22 +136,124 @@ export function AppSidebar() {
       </div>
       <nav className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1 px-2">
-          {menuItems.map(({ href, icon: Icon, label }) => (
-            <li key={href}>
-              <Link
-                href={href}
-                className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 transition-colors text-sm",
-                  isActive(href)
-                    ? "bg-secondary text-secondary-foreground font-medium"
-                    : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground",
-                  isCollapsed && "justify-center"
-                )}
-                title={isCollapsed ? label : undefined}
-              >
-                <Icon className="h-4 w-4 flex-shrink-0" />
-                {!isCollapsed && <span>{label}</span>}
-              </Link>
+          {menuItems.map((item) => (
+            <li key={item.href}>
+              {item.subItems ? (
+                isCollapsed ? (
+                  <Popover
+                    open={openPopover === item.href}
+                    onOpenChange={(open) =>
+                      setOpenPopover(open ? item.href : null)
+                    }
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-center px-3 py-2 text-sm",
+                          isParentActive(item) &&
+                            "bg-secondary text-secondary-foreground font-medium",
+                          !isParentActive(item) &&
+                            "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
+                        )}
+                      >
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56 p-0" align="start">
+                      <ul className="space-y-1">
+                        {item.subItems.map((subItem) => (
+                          <li key={subItem.href}>
+                            <Link
+                              href={subItem.href}
+                              className={cn(
+                                "flex items-center gap-3 rounded-md px-3 py-2 transition-colors text-sm",
+                                isActive(subItem.href)
+                                  ? "bg-secondary text-secondary-foreground font-medium"
+                                  : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
+                              )}
+                              onClick={() => setOpenPopover(null)}
+                            >
+                              <subItem.icon className="h-4 w-4 flex-shrink-0" />
+                              <span>{subItem.label}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </PopoverContent>
+                  </Popover>
+                ) : (
+                  <Collapsible
+                    open={openCollapsible === item.href}
+                    onOpenChange={(open) =>
+                      setOpenCollapsible(open ? item.href : null)
+                    }
+                  >
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start px-3 py-2 text-sm",
+                          isParentActive(item) &&
+                            "bg-secondary text-secondary-foreground font-medium",
+                          !isParentActive(item) &&
+                            "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
+                        )}
+                      >
+                        <item.icon className="h-4 w-4 flex-shrink-0 mr-2" />
+                        <span>{item.label}</span>
+                        <ChevronDown
+                          className={cn(
+                            "ml-auto h-4 w-4 transition-transform duration-200",
+                            openCollapsible === item.href &&
+                              "transform rotate-180"
+                          )}
+                        />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <ul className="space-y-1 mt-1 ml-6">
+                        {item.subItems.map((subItem) => (
+                          <li key={subItem.href}>
+                            <Link
+                              href={subItem.href}
+                              className={cn(
+                                "flex items-center gap-3 rounded-md px-3 py-2 transition-colors text-sm",
+                                isActive(subItem.href)
+                                  ? "bg-secondary text-secondary-foreground font-medium"
+                                  : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
+                              )}
+                            >
+                              <subItem.icon className="h-4 w-4 flex-shrink-0" />
+                              <span>{subItem.label}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )
+              ) : (
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 transition-colors text-sm",
+                    isActive(item.href)
+                      ? "bg-secondary text-secondary-foreground font-medium"
+                      : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground",
+                    isCollapsed && "justify-center"
+                  )}
+                  title={isCollapsed ? item.label : undefined}
+                >
+                  <item.icon
+                    className={cn(
+                      "h-4 w-4 flex-shrink-0",
+                      isActive(item.href) && "text-secondary-foreground"
+                    )}
+                  />
+                  {!isCollapsed && <span>{item.label}</span>}
+                </Link>
+              )}
             </li>
           ))}
         </ul>
