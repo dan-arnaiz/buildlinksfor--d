@@ -20,21 +20,19 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} bg-background min-h-screen`}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-          <Sidebar />
-          <div className="flex flex-col overflow-x-auto">
-            <Header />
-            <main className="flex-1 p-6 w-full">
-              <div className="max-w-full">
-                {children}
-              </div>
-              <Toaster />
-            </main>
-          </div>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+            <Sidebar />
+            <div className="flex flex-col overflow-x-auto">
+              <Header />
+              <main className="flex-1 p-6 w-full">
+                <div className="max-w-full">{children}</div>
+                <Toaster />
+              </main>
+            </div>
           </div>
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

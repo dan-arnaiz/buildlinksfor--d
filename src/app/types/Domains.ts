@@ -3,7 +3,7 @@ export type Domain = {
   name: string;
   niches: string;
   keywords: string;
-  existingLinks: string;
+  notes: string;
   seoMetricsRequirements?: {
     minDomainRating?: number;
     minDomainAuthority?: number;

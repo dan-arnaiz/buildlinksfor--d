@@ -82,25 +82,7 @@ const formSchema = z.object({
       (value) => value.every((item) => item.trim() !== ""),
       "Empty keyword values are not allowed"
     ),
-  existingLinks: z.string().transform(
-    (str) =>
-      str
-        .split("\n")
-        .map((s) => s.trim())
-        .filter((link) => {
-          const urlPattern = new RegExp(
-            "^(https?:\\/\\/)?" + // protocols
-              "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
-              "((\\d{1,3}\\.){3}d{1,3}))" + // OR ip (v4) address
-              "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
-              "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
-              "(\\#[-a-z\\d_]*)?$",
-            "i"
-          ); // fragment locator
-          return !!urlPattern.test(link);
-        })
-        .join("\n") // Join back into a string
-  ),
+  notes: z.string().optional(),
   seoMetricsRequirements: z.object({
     minDomainRating: z.number().min(0).max(100),
     minDomainAuthority: z.number().min(0).max(100),
@@ -117,8 +99,6 @@ const DomainList: React.FC = () => {
   const [keywords, setKeywords] = useState<string[]>([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [domainToDelete, setDomainToDelete] = useState<Domain | null>(null);
-  const [selectedDomainLinks, setSelectedDomainLinks] = useState<string[]>([]);
-  const [isLinksModalOpen, setIsLinksModalOpen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -127,7 +107,7 @@ const DomainList: React.FC = () => {
       name: "",
       niches: [],
       keywords: [],
-      existingLinks: "",
+      notes: "",
       seoMetricsRequirements: {
         minDomainRating: 0,
         minDomainAuthority: 0,
@@ -171,7 +151,7 @@ const DomainList: React.FC = () => {
         name: domain.name,
         niches: domain.niches.split(","),
         keywords: domain.keywords.split(","),
-        existingLinks: domain.existingLinks,
+        notes: domain.notes || "",
         seoMetricsRequirements: {
           minDomainRating: domain.seoMetricsRequirements?.minDomainRating || 0,
           minDomainAuthority:
@@ -187,7 +167,7 @@ const DomainList: React.FC = () => {
         name: "",
         niches: [],
         keywords: [],
-        existingLinks: "",
+        notes: "",
         seoMetricsRequirements: {
           minDomainRating: 0,
           minDomainAuthority: 0,
@@ -213,11 +193,6 @@ const DomainList: React.FC = () => {
   const handleCloseDeleteDialog = () => {
     setIsDeleteDialogOpen(false);
     setDomainToDelete(null);
-  };
-
-  const handleOpenLinksModal = (links: string) => {
-    setSelectedDomainLinks(links.split("\n").map((link) => link.trim()));
-    setIsLinksModalOpen(true);
   };
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -263,12 +238,15 @@ const DomainList: React.FC = () => {
         );
         toast({ title: "Success", description: "Domain updated successfully" });
       } else {
-        const newDomain = await addDomain(domainData);
+        const newDomain = await addDomain({
+          ...domainData,
+          notes: domainData.notes || "",
+        });
         setDomains([...domains, newDomain]);
         toast({ title: "Success", description: "Domain added successfully" });
       }
       handleCloseDialog();
-      await fetchData(); // Refresh the data after adding/updating
+      await fetchData();
     } catch (error) {
       toast({
         title: "Error",
@@ -480,14 +458,14 @@ const DomainList: React.FC = () => {
                   />
                   <FormField
                     control={form.control}
-                    name="existingLinks"
+                    name="notes"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Existing Links</FormLabel>
+                        <FormLabel>Notes</FormLabel>
                         <FormControl>
                           <Textarea
                             {...field}
-                            placeholder="Enter existing links, one per line"
+                            placeholder="Enter notes"
                             className="h-24"
                           />
                         </FormControl>
@@ -534,23 +512,7 @@ const DomainList: React.FC = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <Dialog open={isLinksModalOpen} onOpenChange={setIsLinksModalOpen}>
-        <DialogContent className="sm:max-w-[425px] md:max-w-[550px] p-6">
-          <DialogHeader>
-            <DialogTitle>Existing Links</DialogTitle>
-          </DialogHeader>
-          <div className="max-h-[400px] overflow-y-auto">
-            {selectedDomainLinks.map((link, index) => (
-              <p key={index} className="mb-2 text-sm">
-                {link}
-              </p>
-            ))}
-          </div>
-          <div className="flex justify-end mt-4">
-            <Button onClick={() => setIsLinksModalOpen(false)}>Close</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -568,7 +530,7 @@ const DomainList: React.FC = () => {
                 SEO Metrics Requirements
               </TableHead>
               <TableHead className="p-3 font-semibold bg-gray-100 dark:bg-gray-900">
-                Existing Links
+                Notes
               </TableHead>
 
               <TableHead className="text-right p-3 font-semibold bg-gray-100 dark:bg-gray-900">
@@ -632,18 +594,7 @@ const DomainList: React.FC = () => {
                           {domain.seoMetricsRequirements?.otherRequirements}
                         </div>
                       </TableCell>
-                      <TableCell className="p-3">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            handleOpenLinksModal(domain.existingLinks)
-                          }
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Links
-                        </Button>
-                      </TableCell>
+                      <TableCell className="text-sm">{domain.notes}</TableCell>
                       <TableCell className="text-right p-3">
                         <Button
                           variant="ghost"
@@ -673,12 +624,6 @@ const DomainList: React.FC = () => {
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
-                    </ContextMenuItem>
-                    <ContextMenuItem
-                      onClick={() => handleOpenLinksModal(domain.existingLinks)}
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      View Links
                     </ContextMenuItem>
                   </ContextMenuContent>
                 </ContextMenu>
