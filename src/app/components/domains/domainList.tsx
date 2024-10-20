@@ -301,7 +301,8 @@ const DomainList: React.FC = () => {
       <div className="flex justify-between items-center mb-4 sm:mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold">Domains</h1>
         <Button onClick={() => handleOpenDialog()}>
-          <PlusIcon className="mr-2 h-4 w-4" /> Add Domain
+          <PlusIcon className="mr-0 h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline mr-0">Add Domain</span>
         </Button>
       </div>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -684,7 +685,7 @@ const DomainList: React.FC = () => {
               ))
             ) : (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={5} className="text-center w-full  p-8">
+                <TableCell colSpan={5} className="text-center  p-8">
                   <Loading
                     showProgressBar={false}
                     title="No Domains "

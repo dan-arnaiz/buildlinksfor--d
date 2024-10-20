@@ -555,24 +555,24 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataTable
     setEditingPublisher(publisher)
     form.reset({
       domainName: publisher.domainName,
-      niche: publisher.niche.split(',').map(n => n.trim()),
+      niche: publisher.niche.split(",").map((n) => n.trim()),
       domainRating: publisher.domainRating,
       domainAuthority: publisher.domainAuthority,
       domainTraffic: publisher.domainTraffic,
       trafficLocation: publisher.trafficLocation || "",
       spamScore: publisher.spamScore,
-      linkInsertionPrice: publisher.linkInsertionPrice ,
+      linkInsertionPrice: publisher.linkInsertionPrice,
       guestPostPrice: publisher.guestPostPrice,
       currency: publisher.currency,
-      linkInsertionGuidelines: publisher.linkInsertionGuidelines || '',
-      guestPostGuidelines: publisher.guestPostGuidelines || '',
-      metricsLastUpdate: new Date(publisher.metricsLastUpdate),
-      notes: publisher.notes || '',
+      linkInsertionGuidelines: publisher.linkInsertionGuidelines || "",
+      guestPostGuidelines: publisher.guestPostGuidelines || "",
+      metricsLastUpdate: new Date(),
+      notes: publisher.notes || "",
       isReseller: publisher.isReseller,
       acceptsGreyNiche: publisher.acceptsGreyNiche,
-      contactName: publisher.contactName || '',
-      contactEmail: publisher.contactEmail || '',
-    })
+      contactName: publisher.contactName || "",
+      contactEmail: publisher.contactEmail || "",
+    });
     setIsFormOpen(true)
   }
 
