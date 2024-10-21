@@ -1,37 +1,97 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Publisher } from '../../types/Publisher'
-import {  addPublisher, updatePublisher, deletePublisher, fetchPublishers } from '../../actions/publisherActions'
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import { useToast } from "@/hooks/use-toast"
-import { MultiSelect } from "@/components/ui/multi-select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle} from "@/components/ui/alert-dialog"
-import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu"
-
-
-
-import { Input } from "@/components/ui/input"
-
-import {  SearchIcon, Edit2Icon, Trash2Icon,  ArrowUpDown, Eye , SearchXIcon} from 'lucide-react'
-
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel, getSortedRowModel, SortingState, getFilteredRowModel, VisibilityState } from "@tanstack/react-table"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { format } from 'date-fns'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { currencies } from '../../api/publishers/currencies'
-import { Card } from '@/components/ui/card'
-
+import { Publisher, formSchema } from "../../types/Publisher";
+import {
+  addPublisher,
+  updatePublisher,
+  deletePublisher,
+  fetchPublishers,
+} from "../../actions/publisherActions";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { MultiSelect } from "@/components/ui/multi-select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { Input } from "@/components/ui/input";
+import {
+  SearchIcon,
+  Edit2Icon,
+  Trash2Icon,
+  ArrowUpDown,
+  Eye,
+  SearchXIcon,
+} from "lucide-react";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
+  getFilteredRowModel,
+  VisibilityState,
+} from "@tanstack/react-table";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { format } from "date-fns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { currencies } from "../../api/publishers/currencies";
+import { Card } from "@/components/ui/card";
 function extractDomainFromUrl(url: string): string {
   if (!url) return '';
   try {
@@ -371,65 +431,7 @@ const columns: ColumnDef<Publisher>[] = [
 
 ]
 
-const formSchema = z.object({
-  domainName: z.string()
-  .min(1, "Domain name is required")
-  .transform(value => {
-    // Remove http://, https://, www., and trailing slash
-    return value.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
-  })
-  .refine(
-    (value) => {
-      const domainPattern = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
-      return domainPattern.test(value);
-    },
-    "Invalid domain name format. It should be domainname.com"
-  ),
-  niche: z.array(z.string())
-    .min(1, "At least one niche is required")
-    .refine(
-      (value) => value.every(item => item.trim() !== ""),
-      "Empty niche values are not allowed"
-    ),
-  domainRating: z.coerce.number().min(0).max(100),
-  domainAuthority: z.coerce.number().min(0).max(100),
-  domainTraffic: z.coerce.number().min(0),
-  trafficLocation: z.string().optional(),
-  spamScore: z.coerce.number().min(0).max(100),
-  linkInsertionPrice: z.coerce.number().min(0),
-  guestPostPrice: z.coerce.number().min(0),
-  currency: z.string().optional(),
-  linkInsertionGuidelines: z.string().optional(),
-  guestPostGuidelines: z.string().optional(),
-  metricsLastUpdate: z.date(),
-  notes: z.string().optional(),
-  isReseller: z.boolean(),
-  acceptsGreyNiche: z.boolean(),
-  contactName: z.string().min(1, "Contact name is required"),
-  contactEmail: z.string().email("Invalid email address"),
-}).refine(
-  (data) => {
-    if (data.linkInsertionPrice > 0 || data.guestPostPrice > 0) {
-      return !!data.currency;
-    }
-    return true;
-  },
-  {
-    message: "Currency is required",
-    path: ["currency"],
-  }
-).refine(
-  (data) => {
-    if (data.isReseller) {
-      return !!data.notes;
-    }
-    return true;
-  },
-  {
-    message: "Notes are required, please put some information for resellers",
-    path: ["notes"],
-  }
-)
+
 
 
 export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataTableRefresh }: { initialData: Publisher[], isFormOpen: boolean, setIsFormOpen: (isFormOpen: boolean) => void , onDataTableRefresh: () => void }) {

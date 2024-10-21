@@ -675,7 +675,7 @@ export default function DomainList() {
                 <TableCell colSpan={5} className="text-center  p-8">
                   <Loading
                     showProgressBar={false}
-                    title="No Domains "
+                    title="No Active Domains "
                     subtitle="Add a domain to get started"
                   />
                   <Button onClick={() => handleOpenDialog()}>
