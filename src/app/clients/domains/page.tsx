@@ -1,4 +1,4 @@
-import DomainList from "../components/domains/domainList";
+import DomainList from "../../components/domains/domainList";
 
 export default function DomainsPage() {
   return (

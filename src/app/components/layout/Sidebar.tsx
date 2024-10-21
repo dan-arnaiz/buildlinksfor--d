@@ -69,21 +69,21 @@ export function AppSidebar() {
       label: "Clients",
       subItems: [
         {
-          href: "/domains",
+          href: "/clients/domains",
           icon: Globe,
           label: "Domains",
         },
         {
-          href: "/domains/find-publisher",
+          href: "/clients/find-publishers",
           icon: Search,
           label: "Find Publishers",
         },
         {
-          href: "/on-progress",
+          href: "/clients/on-progress",
           icon: Ellipsis,
           label: "On Progress",
         },
-        { href: "/domains/live-links", icon: LinkIcon, label: "Live Links" },
+        { href: "/clients/live-links", icon: LinkIcon, label: "Live Links" },
       ],
     },
     { href: "/publishers", icon: BookOpen, label: "Publishers" },

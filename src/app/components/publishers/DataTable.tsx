@@ -434,17 +434,33 @@ const columns: ColumnDef<Publisher>[] = [
 
 
 
-export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataTableRefresh }: { initialData: Publisher[], isFormOpen: boolean, setIsFormOpen: (isFormOpen: boolean) => void , onDataTableRefresh: () => void }) {
-  const [data, setData] = useState<Publisher[]>(initialData)
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [editingPublisher, setEditingPublisher] = useState<Publisher | null>(null)
-  const [globalFilter, setGlobalFilter] = useState("")
-  const [niches, setNiches] = useState<string[]>([])
-  const [publisherToDelete, setPublisherToDelete] = useState<Publisher | null>(null)
-  const router = useRouter()
-  const { toast } = useToast()
-  const [selectedPublisher, setSelectedPublisher] = useState<Publisher | null>(null)
+export function DataTable({
+  initialData,
+  isFormOpen,
+  setIsFormOpen,
+  onDataTableRefresh,
+}: {
+  initialData: Publisher[];
+  isFormOpen?: boolean;
+  setIsFormOpen?: (isFormOpen: boolean) => void;
+  onDataTableRefresh?: () => void;
+}) {
+  const [data, setData] = useState<Publisher[]>(initialData);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [editingPublisher, setEditingPublisher] = useState<Publisher | null>(
+    null
+  );
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [niches, setNiches] = useState<string[]>([]);
+  const [publisherToDelete, setPublisherToDelete] = useState<Publisher | null>(
+    null
+  );
+  const router = useRouter();
+  const { toast } = useToast();
+  const [selectedPublisher, setSelectedPublisher] = useState<Publisher | null>(
+    null
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -468,9 +484,7 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataTable
       contactName: "",
       contactEmail: "",
     },
-  })
-
-  
+  });
 
   const table = useReactTable({
     data,
@@ -487,39 +501,44 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataTable
       columnVisibility,
       globalFilter,
     },
-  })
-  
-
-  
+  });
 
   useEffect(() => {
-    const uniqueNiches = Array.from(new Set(data.flatMap(publisher => publisher.niche.split(',').map(n => n.trim()))))
-    setNiches(uniqueNiches)
-  }, [data])
-
-
+    const uniqueNiches = Array.from(
+      new Set(
+        data.flatMap((publisher) =>
+          publisher.niche.split(",").map((n) => n.trim())
+        )
+      )
+    );
+    setNiches(uniqueNiches);
+  }, [data]);
 
   const handleAddPublisher = async (values: z.infer<typeof formSchema>) => {
     try {
-      const cleanedNiches = values.niche.flatMap(niche => {
-        if (niche.startsWith('[') && niche.endsWith(']')) {
-          try {
-            return JSON.parse(niche);
-          } catch {
-            return niche;
+      const cleanedNiches = values.niche
+        .flatMap((niche) => {
+          if (niche.startsWith("[") && niche.endsWith("]")) {
+            try {
+              return JSON.parse(niche);
+            } catch {
+              return niche;
+            }
           }
-        }
-        return niche;
-      }).filter(Boolean);
+          return niche;
+        })
+        .filter(Boolean);
 
-      const nicheString = Array.from(new Set(cleanedNiches)).join(',');
+      const nicheString = Array.from(new Set(cleanedNiches)).join(",");
 
       const publisherData = {
         ...values,
         niche: nicheString,
-      }
-  
-      const isDuplicate = data.some(publisher => publisher.domainName === publisherData.domainName);
+      };
+
+      const isDuplicate = data.some(
+        (publisher) => publisher.domainName === publisherData.domainName
+      );
       if (isDuplicate) {
         toast({
           title: "Error",
@@ -533,28 +552,28 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataTable
         trafficLocation: publisherData.trafficLocation || "",
         acceptsGreyNiche: publisherData.acceptsGreyNiche || false,
         currency: publisherData.currency || "",
-      })
-      await fetchPublishers(true)
-      setData([...data, addedPublisher])
-      setIsFormOpen(false)
-      form.reset()
-      onDataTableRefresh()
-      router.refresh()
+      });
+      await fetchPublishers(true);
+      setData([...data, addedPublisher]);
+      setIsFormOpen?.(false);
+      form.reset();
+      onDataTableRefresh?.();
+      router.refresh();
       toast({
         title: "Success",
         description: "Publisher added successfully",
-      })
+      });
     } catch (error) {
-      console.error('Error adding publisher:', error)
+      console.error("Error adding publisher:", error);
       toast({
         title: "Error",
         description: "Failed to add publisher",
-      })
+      });
     }
-  }
+  };
 
   const handleEditPublisher = (publisher: Publisher) => {
-    setEditingPublisher(publisher)
+    setEditingPublisher(publisher);
     form.reset({
       domainName: publisher.domainName,
       niche: publisher.niche.split(",").map((n) => n.trim()),
@@ -575,26 +594,32 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataTable
       contactName: publisher.contactName || "",
       contactEmail: publisher.contactEmail || "",
     });
-    setIsFormOpen(true)
-  }
+    setIsFormOpen?.(true);
+  };
 
   const handleUpdatePublisher = async (values: z.infer<typeof formSchema>) => {
     if (editingPublisher) {
       try {
-        const cleanedNiches = values.niche.flatMap(niche => {
-          if (niche.startsWith('[') && niche.endsWith(']')) {
-            try {
-              return JSON.parse(niche);
-            } catch {
-              return niche;
+        const cleanedNiches = values.niche
+          .flatMap((niche) => {
+            if (niche.startsWith("[") && niche.endsWith("]")) {
+              try {
+                return JSON.parse(niche);
+              } catch {
+                return niche;
+              }
             }
-          }
-          return niche;
-        }).filter(Boolean);
+            return niche;
+          })
+          .filter(Boolean);
 
-        const nicheString = Array.from(new Set(cleanedNiches)).join(',');
+        const nicheString = Array.from(new Set(cleanedNiches)).join(",");
 
-        const isDuplicate = data.some(publisher => publisher.domainName === values.domainName && publisher.id !== editingPublisher.id);
+        const isDuplicate = data.some(
+          (publisher) =>
+            publisher.domainName === values.domainName &&
+            publisher.id !== editingPublisher.id
+        );
         if (isDuplicate) {
           toast({
             title: "Error",
@@ -603,70 +628,71 @@ export function DataTable({ initialData, isFormOpen, setIsFormOpen , onDataTable
           return;
         }
 
-        const updatedPublisher = await updatePublisher({ 
-          ...editingPublisher, 
+        const updatedPublisher = await updatePublisher({
+          ...editingPublisher,
           ...values,
           trafficLocation: values.trafficLocation || "",
           currency: values.currency || "",
 
-          niche: nicheString
-        })
-        setData(data.map(p => p.id === updatedPublisher.id ? updatedPublisher : p))
-        setEditingPublisher(null)
-        setIsFormOpen(false)
-        router.refresh()
-        onDataTableRefresh()
-        form.reset()
-        await fetchPublishers(true)
+          niche: nicheString,
+        });
+        setData(
+          data.map((p) => (p.id === updatedPublisher.id ? updatedPublisher : p))
+        );
+        setEditingPublisher(null);
+        setIsFormOpen?.(false);
+        router.refresh();
+        onDataTableRefresh?.();
+        form.reset();
+        await fetchPublishers(true);
         toast({
           title: "Success",
           description: "Publisher updated successfully",
-        })
+        });
       } catch (error) {
-        console.error('Error updating publisher:', error)
+        console.error("Error updating publisher:", error);
         toast({
           title: "Error",
           description: "Failed to update publisher",
-        })
+        });
       }
     }
-  }
-  
+  };
 
   const handleDeletePublisher = async () => {
     if (publisherToDelete) {
       try {
-        await deletePublisher(publisherToDelete.id)
-        setData(data.filter(p => p.id !== publisherToDelete.id))
-        setPublisherToDelete(null)
-        router.refresh()
-        await fetchPublishers(true)
-        onDataTableRefresh()
+        await deletePublisher(publisherToDelete.id);
+        setData(data.filter((p) => p.id !== publisherToDelete.id));
+        setPublisherToDelete(null);
+        router.refresh();
+        await fetchPublishers(true);
+        onDataTableRefresh?.();
         toast({
           title: "Success",
           description: "Publisher deleted successfully",
-        })
+        });
       } catch (error) {
-        console.error('Error deleting publisher:', error)
+        console.error("Error deleting publisher:", error);
         toast({
           title: "Error",
           description: "Failed to delete publisher",
-        })
+        });
       }
     }
-  }
+  };
 
   const handleCloseForm = () => {
-    setIsFormOpen(false)
-    setEditingPublisher(null)
-    form.reset()
-  }
+    setIsFormOpen?.(false);
+    setEditingPublisher(null);
+    form.reset();
+  };
 
   const handleViewPublisher = (publisher: Publisher) => {
     // Implement view logic here
-    console.log("Viewing publisher:", publisher)
+    console.log("Viewing publisher:", publisher);
     // You might want to open a modal or navigate to a details page
-  }
+  };
 
   return (
     <div>
