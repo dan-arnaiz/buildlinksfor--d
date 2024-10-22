@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   Home,
   Package2,
@@ -10,36 +9,22 @@ import {
   Users,
   Settings,
   Globe,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
-  CreditCard,
-  Bell,
-  Zap,
-  ChevronsUpDown,
   Search,
-  Link as LinkIcon,
+  LinkIcon,
   Users2,
-  Loader2,
-  Loader2Icon,
-  LoaderCircle,
-  LoaderCircleIcon,
-  LoaderPinwheelIcon,
   Ellipsis,
+  ChevronLeft,
   ChevronDown,
+  ChevronsUpDown,
+  Bell,
+  CreditCard,
+  Zap,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ModeToggle } from "@/components/ui/mode-tonggle";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { progress } from "framer-motion";
 import {
   Popover,
   PopoverContent,
@@ -50,16 +35,31 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-export function AppSidebar() {
+export function AppSidebar({
+  className,
+  isMobile = false,
+  onMobileItemClick,
+}: {
+  className?: string;
+  isMobile?: boolean;
+  onMobileItemClick?: () => void;
+}) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openPopover, setOpenPopover] = useState<string | null>(null);
   const [openCollapsible, setOpenCollapsible] = useState<string | null>(null);
   const pathname = usePathname();
 
   const isActive = (path: string) => pathname === path;
-
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  const isParentActive = (item: any) =>
+    item.subItems?.some((subItem: any) => isActive(subItem.href)) ||
+    isActive(item.href);
 
   const menuItems = [
     { href: "/", icon: Home, label: "Dashboard" },
@@ -68,21 +68,13 @@ export function AppSidebar() {
       icon: Users2,
       label: "Clients",
       subItems: [
-        {
-          href: "/clients/domains",
-          icon: Globe,
-          label: "Domains",
-        },
+        { href: "/clients/domains", icon: Globe, label: "Domains" },
         {
           href: "/clients/find-publishers",
           icon: Search,
           label: "Find Publishers",
         },
-        {
-          href: "/clients/on-progress",
-          icon: Ellipsis,
-          label: "On Progress",
-        },
+        { href: "/clients/on-progress", icon: Ellipsis, label: "On Progress" },
         { href: "/clients/live-links", icon: LinkIcon, label: "Live Links" },
       ],
     },
@@ -91,27 +83,21 @@ export function AppSidebar() {
     { href: "/settings", icon: Settings, label: "Settings" },
   ];
 
-  const isParentActive = (item: any) => {
-    if (item.subItems) {
-      return item.subItems.some((subItem: any) => isActive(subItem.href));
+  const handleItemClick = () => {
+    if (isMobile && onMobileItemClick) {
+      onMobileItemClick();
     }
-    return isActive(item.href);
   };
-
-  useEffect(() => {
-    if (!isCollapsed) {
-      setOpenPopover(null);
-    }
-  }, [isCollapsed]);
 
   return (
     <div
       className={cn(
-        "flex flex-col bg-background border-r transition-all duration-300",
-        isCollapsed ? "w-16" : "w-64"
+        "flex flex-col bg-background transition-all duration-300",
+        isCollapsed && !isMobile ? "w-16" : "w-64",
+        className
       )}
     >
-      <div className="flex items-center h-14 px-4 border-b justify-between lg:h-[60px]">
+      <div className="flex items-center h-14 px-4 border-b bg-muted/40 justify-between lg:h-[60px] lg:px-6">
         {!isCollapsed && (
           <Link
             href="/"
@@ -121,18 +107,18 @@ export function AppSidebar() {
             <span>Publisher DB</span>
           </Link>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          className="h-8 w-8"
-        >
-          {isCollapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
-        </Button>
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="ml-auto"
+          >
+            <ChevronLeft
+              className={cn("h-4 w-4", isCollapsed && "rotate-180")}
+            />
+          </Button>
+        )}
       </div>
       <nav className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1 px-2">
@@ -172,7 +158,10 @@ export function AppSidebar() {
                                   ? "bg-secondary text-secondary-foreground font-medium"
                                   : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
                               )}
-                              onClick={() => setOpenPopover(null)}
+                              onClick={() => {
+                                setOpenPopover(null);
+                                handleItemClick();
+                              }}
                             >
                               <subItem.icon className="h-4 w-4 flex-shrink-0" />
                               <span>{subItem.label}</span>
@@ -223,6 +212,7 @@ export function AppSidebar() {
                                   ? "bg-secondary text-secondary-foreground font-medium"
                                   : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
                               )}
+                              onClick={handleItemClick}
                             >
                               <subItem.icon className="h-4 w-4 flex-shrink-0" />
                               <span>{subItem.label}</span>
@@ -244,6 +234,7 @@ export function AppSidebar() {
                     isCollapsed && "justify-center"
                   )}
                   title={isCollapsed ? item.label : undefined}
+                  onClick={handleItemClick}
                 >
                   <item.icon
                     className={cn(
