@@ -59,7 +59,8 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { formSchema } from "@/app/types/Domains";
-
+import { Badge } from "@/components/ui/badge";
+  
 export default function DomainList() {
   const [domains, setDomains] = useState<Domain[]>([]);
   const [filteredDomains, setFilteredDomains] = useState<Domain[]>([]);
@@ -574,6 +575,9 @@ export default function DomainList() {
               <TableHead className="p-3 font-semibold bg-gray-100 dark:bg-gray-900">
                 Notes
               </TableHead>
+              <TableHead className="p-3 font-semibold bg-gray-100 dark:bg-gray-900">
+                Status
+              </TableHead>
 
               <TableHead className="text-right p-3 font-semibold bg-gray-100 dark:bg-gray-900">
                 Actions
@@ -637,6 +641,13 @@ export default function DomainList() {
                         </div>
                       </TableCell>
                       <TableCell className="text-sm">{domain.notes}</TableCell>
+                      <TableCell className="p-3">
+                        <Badge
+                          variant={domain.archived ? "secondary" : "default"}
+                        >
+                          {domain.archived ? "Archived" : "Active"}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-right p-3">
                         <Button
                           variant="ghost"
