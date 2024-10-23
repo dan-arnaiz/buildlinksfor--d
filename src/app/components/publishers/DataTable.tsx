@@ -67,6 +67,9 @@ import {
   ArrowUpDown,
   Eye,
   SearchXIcon,
+  MoreHorizontal,
+  LinkIcon,
+  BanIcon,
 } from "lucide-react";
 import {
   ColumnDef,
@@ -93,6 +96,8 @@ import { currencies } from "../../api/publishers/currencies";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { getFaviconUrl, getInitials } from "@/app/utils/domainUtils";
+import { DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+
 
 
 
@@ -138,7 +143,7 @@ const columns: ColumnDef<Publisher>[] = [
 
       return (
         <div className="flex items-center">
-          <div className="w-4 h-4 mr-2 flex items-center justify-center bg-gray-200 rounded-full text-xs font-bold overflow-hidden">
+          <div className="w-4 h-4 mr-1 flex items-center justify-center bg-gray-200 rounded-full text-xs font-bold overflow-hidden">
             <Image
               src={faviconUrl}
               alt={`${domainName} favicon`}
@@ -431,7 +436,41 @@ const columns: ColumnDef<Publisher>[] = [
     ),
     enableSorting: false,
   },
-
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => {
+      const publisher = row.original;
+      return (
+        <div className="flex items-center justify-center space-x-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleViewPublisher(publisher)}
+            title="View"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleEditPublisher(publisher)}
+            title="Edit"
+          >
+            <Edit2Icon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setPublisherToDelete(publisher)}
+            title="Delete"
+          >
+            <Trash2Icon className="h-4 w-4" />
+          </Button>
+        </div>
+      );
+    },
+  },
 ]
 
 
@@ -702,21 +741,24 @@ export function DataTable({
   // Helper function to render table row
   const renderTableRow = (row: any) => (
     <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-      {row.getVisibleCells().map((cell: any, index: number) => (
+      {row.getVisibleCells().map((cell: any) => (
         <TableCell
           key={cell.id}
           className={`px-4 py-3 ${
-            index < 2 ? "text-left" : "text-center"
+            cell.column.id === "actions" ? "sticky right-0 bg-white shadow-sm z-10" : ""
           }`}
         >
-          {flexRender(
-            cell.column.columnDef.cell,
-            cell.getContext()
-          )}
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </TableCell>
       ))}
     </TableRow>
   );
+
+  const handleGetLinks = (publisher: Publisher) => {
+    // Implement the logic to get links for the publisher
+    console.log("Get links for:", publisher)
+    // You might want to navigate to a new page or open a modal here
+  }
 
   return (
     <div>
@@ -1185,100 +1227,98 @@ export function DataTable({
           </DropdownMenu>
         </div>
       </div>
-      <div className="relative">
-        <div className="rounded-md border ">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header, index) => (
-                    <TableHead
-                      key={header.id}
-                      className={`px-4 py-3 ${
-                        index < 2 ? "text-left" : "text-center"
-                      }`}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  disableContextMenu ? (
-                    renderTableRow(row)
-                  ) : (
-                    <ContextMenu key={row.id}>
-                      <ContextMenuTrigger asChild>
-                        {renderTableRow(row)}
-                      </ContextMenuTrigger>
-                      <ContextMenuContent className="auto">
-                        <ContextMenuItem
-                          onClick={() => handleViewPublisher(row.original)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          View
-                        </ContextMenuItem>
-                        <ContextMenuItem
-                          onClick={() => handleEditPublisher(row.original)}
-                        >
-                          <Edit2Icon className="mr-2 h-4 w-4" />
-                          Edit
-                        </ContextMenuItem>
-                        <ContextMenuItem
-                          onClick={() => setPublisherToDelete(row.original)}
-                        >
-                          <Trash2Icon className="mr-2 h-4 w-4" />
-                          Delete
-                        </ContextMenuItem>
-                      </ContextMenuContent>
-                    </ContextMenu>
-                  )
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24">
-                    <div className="flex items-center justify-center text-gray-500">
-                      <SearchXIcon className="mr-2 h-4 w-4" />
-                      <span className="text-xs font-medium">
-                        No Publishers Found
-                      </span>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        <div className="flex items-center justify-between py-4">
-          <p className="text-sm text-gray-500 italic">
-            Note: Metrics data may not be up to date. Please double-check.
-          </p>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-          </div>
+      <div className="relative overflow-x-auto">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className={`px-4 py-3 ${
+                      header.id === "actions" ? "sticky right-0 bg-white shadow-sm z-10" : ""
+                    }`}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                disableContextMenu ? (
+                  renderTableRow(row)
+                ) : (
+                  <ContextMenu key={row.id}>
+                    <ContextMenuTrigger asChild>
+                      {renderTableRow(row)}
+                    </ContextMenuTrigger>
+                    <ContextMenuContent className="w-40">
+                      <ContextMenuItem
+                        onClick={() => handleViewPublisher(row.original)}
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        View
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() => handleEditPublisher(row.original)}
+                      >
+                        <Edit2Icon className="mr-2 h-4 w-4" />
+                        Edit
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() => setPublisherToDelete(row.original)}
+                      >
+                        <Trash2Icon className="mr-2 h-4 w-4" />
+                        Delete
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
+                )
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24">
+                  <div className="flex items-center justify-center text-muted-foreground">
+                    <SearchXIcon className="mr-2 h-4 w-4" />
+                    <span className="text-xs font-medium">
+                      No Publishers Found
+                    </span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-between py-4">
+        <p className="text-sm text-gray-500 italic">
+          Note: Metrics data may not be up to date. Please double-check.
+        </p>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
         </div>
       </div>
       <AlertDialog

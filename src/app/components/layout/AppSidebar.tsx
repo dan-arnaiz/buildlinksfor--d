@@ -252,7 +252,7 @@ export function AppSidebar({
       <div className="border-t p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-full justify-start px-2">
+            <Button variant="ghost" className="w-full justify-center px-2">
               <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
                   <AvatarImage
