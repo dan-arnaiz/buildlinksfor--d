@@ -60,6 +60,10 @@ import {
 } from "@/components/ui/context-menu";
 import { formSchema } from "@/app/types/Domains";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
+import { getFaviconUrl, getInitials } from "@/app/utils/domainUtils";
+
+
   
 export default function DomainList() {
   const [domains, setDomains] = useState<Domain[]>([]);
@@ -267,6 +271,8 @@ export default function DomainList() {
     }
     handleCloseDeleteDialog();
   };
+
+
 
   return (
     <div className="space-y-4">
@@ -592,11 +598,21 @@ export default function DomainList() {
                     <TableRow>
                       <TableCell className="font-medium p-3">
                         <div className="flex items-center">
-                          <img
-                            src={`https://www.google.com/s2/favicons?domain=${domain.name}`}
-                            alt="Favicon"
-                            className="w-4 h-4 mr-2"
-                          />
+                          <div className="w-4 h-4 mr-2 flex items-center justify-center bg-gray-200 rounded-full text-xs font-bold overflow-hidden">
+                            <Image
+                              src={getFaviconUrl(domain.name)}
+                              alt={`${domain.name} favicon`}
+                              width={16}
+                              height={16}
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                const parentElement = e.currentTarget.parentElement;
+                                if (parentElement) {
+                                  parentElement.innerHTML = getInitials(domain.name);
+                                }
+                              }}
+                            />
+                          </div>
                           <a
                             href={`https://${domain.name}`}
                             target="_blank"
@@ -683,7 +699,7 @@ export default function DomainList() {
               ))
             ) : (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={5} className="text-center  p-8">
+                <TableCell colSpan={7} className="text-center  p-8">
                   <Loading
                     showProgressBar={false}
                     title="No Active Domains "

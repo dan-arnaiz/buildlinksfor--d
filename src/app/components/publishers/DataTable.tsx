@@ -11,7 +11,6 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { MultiSelect } from "@/components/ui/multi-select";
@@ -92,6 +91,11 @@ import {
 } from "@/components/ui/select";
 import { currencies } from "../../api/publishers/currencies";
 import { Card } from "@/components/ui/card";
+import Image from "next/image";
+import { getFaviconUrl, getInitials } from "@/app/utils/domainUtils";
+
+
+
 function extractDomainFromUrl(url: string): string {
   if (!url) return '';
   try {
@@ -129,24 +133,23 @@ const columns: ColumnDef<Publisher>[] = [
     cell: ({ row }) => {
       const value = row.getValue("faviconAndDomain") as string
       const domainName = extractDomainFromUrl(value)
-      const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domainName)}&sz=32`
+      const faviconUrl = getFaviconUrl(domainName)
       const url = isValidUrl(value) ? value : `https://${domainName}`
 
       return (
         <div className="flex items-center">
-          <div className="w-4 h-4 mr-2 flex items-center justify-center">
+          <div className="w-4 h-4 mr-2 flex items-center justify-center bg-gray-200 rounded-full text-xs font-bold overflow-hidden">
             <Image
               src={faviconUrl}
               alt={`${domainName} favicon`}
               width={16}
               height={16}
-              className="max-w-full max-h-full object-contain"
               onError={(e) => {
-                const initials = domainName.slice(0, 2).toUpperCase();
-                const fallbackElement = document.createElement('div');
-                fallbackElement.className = "w-full h-full  rounded-full flex items-center justify-center text-xs font-bold";
-                fallbackElement.textContent = initials;
-                e.currentTarget.parentNode?.replaceChild(fallbackElement, e.currentTarget);
+                e.currentTarget.onerror = null;
+                const parentElement = e.currentTarget.parentElement;
+                if (parentElement) {
+                  parentElement.innerHTML = getInitials(domainName);
+                }
               }}
             />
           </div>
@@ -439,11 +442,13 @@ export function DataTable({
   isFormOpen,
   setIsFormOpen,
   onDataTableRefresh,
+  disableContextMenu = false, // Add this new prop with a default value of false
 }: {
   initialData: Publisher[];
   isFormOpen?: boolean;
   setIsFormOpen?: (isFormOpen: boolean) => void;
   onDataTableRefresh?: () => void;
+  disableContextMenu?: boolean; // Add this new prop
 }) {
   const [data, setData] = useState<Publisher[]>(initialData);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -693,6 +698,25 @@ export function DataTable({
     console.log("Viewing publisher:", publisher);
     // You might want to open a modal or navigate to a details page
   };
+
+  // Helper function to render table row
+  const renderTableRow = (row: any) => (
+    <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+      {row.getVisibleCells().map((cell: any, index: number) => (
+        <TableCell
+          key={cell.id}
+          className={`px-4 py-3 ${
+            index < 2 ? "text-left" : "text-center"
+          }`}
+        >
+          {flexRender(
+            cell.column.columnDef.cell,
+            cell.getContext()
+          )}
+        </TableCell>
+      ))}
+    </TableRow>
+  );
 
   return (
     <div>
@@ -1188,45 +1212,35 @@ export function DataTable({
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <ContextMenu key={row.id}>
-                    <ContextMenuTrigger asChild>
-                      <TableRow data-state={row.getIsSelected() && "selected"}>
-                        {row.getVisibleCells().map((cell, index) => (
-                          <TableCell
-                            key={cell.id}
-                            className={`px-4 py-3 ${
-                              index < 2 ? "text-left" : "text-center"
-                            }`}
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </ContextMenuTrigger>
-                    <ContextMenuContent className="auto">
-                      <ContextMenuItem
-                        onClick={() => handleViewPublisher(row.original)}
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        View
-                      </ContextMenuItem>
-                      <ContextMenuItem
-                        onClick={() => handleEditPublisher(row.original)}
-                      >
-                        <Edit2Icon className="mr-2 h-4 w-4" />
-                        Edit
-                      </ContextMenuItem>
-                      <ContextMenuItem
-                        onClick={() => setPublisherToDelete(row.original)}
-                      >
-                        <Trash2Icon className="mr-2 h-4 w-4" />
-                        Delete
-                      </ContextMenuItem>
-                    </ContextMenuContent>
-                  </ContextMenu>
+                  disableContextMenu ? (
+                    renderTableRow(row)
+                  ) : (
+                    <ContextMenu key={row.id}>
+                      <ContextMenuTrigger asChild>
+                        {renderTableRow(row)}
+                      </ContextMenuTrigger>
+                      <ContextMenuContent className="auto">
+                        <ContextMenuItem
+                          onClick={() => handleViewPublisher(row.original)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          View
+                        </ContextMenuItem>
+                        <ContextMenuItem
+                          onClick={() => handleEditPublisher(row.original)}
+                        >
+                          <Edit2Icon className="mr-2 h-4 w-4" />
+                          Edit
+                        </ContextMenuItem>
+                        <ContextMenuItem
+                          onClick={() => setPublisherToDelete(row.original)}
+                        >
+                          <Trash2Icon className="mr-2 h-4 w-4" />
+                          Delete
+                        </ContextMenuItem>
+                      </ContextMenuContent>
+                    </ContextMenu>
+                  )
                 ))
               ) : (
                 <TableRow>
