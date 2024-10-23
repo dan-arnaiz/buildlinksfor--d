@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import DomainSelector from "@/app/components/find-publishers/domain-selector";
 import { Domain } from "@/app/types/Domains";
 import { Publisher } from "@/app/types/Publisher";
-import { fetchPublishers } from "@/app/actions/publisherActions";
+import { fetchPublishers, handleBlacklist, handleGetLinks } from "@/app/actions/publisherActions";
 import { DataTable } from "@/app/components/publishers/DataTable";
 import Loading from "@/components/ui/loading";
 import { motion } from "framer-motion";
-import { Search, List, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, List, ChevronDown, ChevronUp, LinkIcon, Link2, LucideLink, BanIcon, PlusIcon, CheckCheckIcon, XIcon } from "lucide-react";
 
 export default function FindPublishers() {
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
@@ -158,6 +158,21 @@ export default function FindPublishers() {
                 key={JSON.stringify(filteredPublishers)}
                 onDataTableRefresh={handleDataTableRefresh}
                 disableContextMenu={true}
+                showActions={true}
+                actions={
+                  [
+                    {
+                      icon: <CheckCheckIcon  className="h-4 w-4 text-primary" />,
+                      label: "Approve",
+                      onClick: (publisher) => handleGetLinks(publisher),                
+                    },
+                    {
+                      icon: <XIcon className="h-4 w-4 text-destructive" />,
+                      label: "Reject",
+                      onClick: (publisher) => handleBlacklist(publisher),
+                    }
+                  ]
+                }
               />
             ) : (
               <div className="bg-secondary rounded-lg p-6 text-center">

@@ -62,7 +62,8 @@ import { formSchema } from "@/app/types/Domains";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { getFaviconUrl, getInitials } from "@/app/utils/domainUtils";
-
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { handleViewRejectedSites } from "@/app/actions/publisherActions";
 
   
 export default function DomainList() {
@@ -581,6 +582,7 @@ export default function DomainList() {
               <TableHead className="p-3 font-semibold bg-gray-100 dark:bg-gray-900">
                 Notes
               </TableHead>
+
               <TableHead className="p-3 font-semibold bg-gray-100 dark:bg-gray-900">
                 Status
               </TableHead>
@@ -677,9 +679,22 @@ export default function DomainList() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleOpenDeleteDialog(domain)}
+                          className="mr-2"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" onClick={() => handleViewRejectedSites(domain)}>
+                                <Eye className="h-4 w-4" />
+                          </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            View Rejected Sites
+                          </TooltipContent>
+                        </Tooltip>
+                        </TooltipProvider>
                       </TableCell>
                     </TableRow>
                   </ContextMenuTrigger>

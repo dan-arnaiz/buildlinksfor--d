@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonProps } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -81,6 +81,7 @@ import {
   SortingState,
   getFilteredRowModel,
   VisibilityState,
+  Row,
 } from "@tanstack/react-table";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -121,373 +122,29 @@ function isValidUrl(string: string) {
   }
 }
 
-const columns: ColumnDef<Publisher>[] = [
-  {
-    id: "faviconAndDomain",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[250px] justify-start"
-      >
-        Domain
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    accessorFn: (row: Publisher & { url?: string }) => row.domainName || row.url || '',
-    cell: ({ row }) => {
-      const value = row.getValue("faviconAndDomain") as string
-      const domainName = extractDomainFromUrl(value)
-      const faviconUrl = getFaviconUrl(domainName)
-      const url = isValidUrl(value) ? value : `https://${domainName}`
 
-      return (
-        <div className="flex items-center">
-          <div className="w-4 h-4 mr-1 flex items-center justify-center bg-gray-200 rounded-full text-xs font-bold overflow-hidden">
-            <Image
-              src={faviconUrl}
-              alt={`${domainName} favicon`}
-              width={16}
-              height={16}
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                const parentElement = e.currentTarget.parentElement;
-                if (parentElement) {
-                  parentElement.innerHTML = getInitials(domainName);
-                }
-              }}
-            />
-          </div>
-          <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline ml-2">
-            {domainName}
-          </a>
-        </div>
-      )
-    },
-    enableHiding: false,
-    enableSorting: true,
-    sortingFn: "alphanumeric",
-    sortDescFirst: false,
-  },
-  {
-    accessorKey: "niche",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[120px] justify-start"
-      >
-        Niche
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const niches = row.getValue("niche") as string;
-      return <div className="text-left">{niches.split(',').map(niche => niche.trim()).join(', ')}</div>;
-    },
-    enableSorting: true,
-  },
-  {
-    accessorKey: "domainRating",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[80px]"
-      >
-        DR
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    cell: ({ row }) => <div className="text-center">{(row.getValue("domainRating") as number).toFixed(0)}</div>,
-    enableSorting: true,
-  },
-  {
-    accessorKey: "domainAuthority",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[80px]"
-      >
-        DA
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    cell: ({ row }) => <div className="text-center">{(row.getValue("domainAuthority") as number).toFixed(0)}</div>,
-    enableSorting: true,
-  },
-  {
-    accessorKey: "domainTraffic",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[120px]"
-      >
-        Traffic
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    cell: ({ row }) => <div className="text-center">{(row.getValue("domainTraffic") as number).toLocaleString()}</div>,
-    enableSorting: true,
-  },
-  {
-    accessorKey: "trafficLocation",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[120px] flex items-center justify-between"
-      >
-        Traffic Location
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => <div className="text-center">{row.getValue("trafficLocation")}</div>,
-    enableSorting: true,
-  },
-  {
-    accessorKey: "spamScore",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[120px]"
-      >
-        Spam Score
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    cell: ({ row }) => <div className="text-center">{row.getValue("spamScore")}%</div>,
-    enableSorting: true,
-  },
-  {
-    accessorKey: "linkInsertionPrice",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[180px]"
-      >
-        Link Insertion Price
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    cell: ({ row }) => <div className="text-center">{row.original.currency || ""}{(row.getValue("linkInsertionPrice") as number).toLocaleString()}</div>,
-    enableSorting: true,
-  },
-  {
-    accessorKey: "guestPostPrice",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[160px]"
-      >
-        Guest Post Price
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    cell: ({ row }) => <div className="text-center">{row.original.currency || ""}{(row.getValue("guestPostPrice") as number).toLocaleString()}</div>,
-    enableSorting: true,
-  },
-  {
-    accessorKey: "linkInsertionGuidelines",
-    header: () => (
-      <Button
-        variant="ghost"
-        className="w-[200px]"
-      >
-        Link Insertion Guidelines
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="max-w-[200px] truncate" title={row.getValue("linkInsertionGuidelines")}>
-        {row.getValue("linkInsertionGuidelines")}
-      </div>
-    ),
-    enableSorting: false,
-  },
-  {
-    accessorKey: "guestPostGuidelines",
-    header: () => (
-      <Button
-        variant="ghost"
-        className="w-[200px]"
-      >
-        Guest Post Guidelines
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="max-w-[200px] truncate" title={row.getValue("guestPostGuidelines")}>
-        {row.getValue("guestPostGuidelines")}
-      </div>
-    ),
-    enableSorting: false,
-  },
-  {
-    accessorKey: "metricsLastUpdate",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[160px]"
-      >
-        Metrics Last Update
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const metricsLastUpdate = row.getValue("metricsLastUpdate");
-      if (metricsLastUpdate && !isNaN(new Date(metricsLastUpdate as string).getTime())) {
-        return (
-          <div className="w-[110px] text-center">
-          {format(new Date(metricsLastUpdate as string), 'MMM d, yyyy')}
-        </div>
-        );
-      }
-      return <div className="max-w-[100px]">N/A</div>;
-    },
-    enableSorting: true,
-  },
-  {
-    accessorKey: "isReseller",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[100px]"
-      >
-        Reseller
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="text-center">
-        {row.getValue("isReseller") ? "Yes" : "No"}
-      </div>
-    ),
-    enableSorting: true,
-  },
-  {
-    accessorKey: "acceptsGreyNiche",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[100px]"
-      >
-        Accepts Grey Niche
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="text-center">
-        {row.getValue("acceptsGreyNiche") ? "Yes" : "No"}
-      </div>
-    ),
-    enableSorting: true,
-  },
-  {
-    accessorKey: "contactName",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[140px]"
-      >
-        Contact Name
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    cell: ({ row }) => <div className="w-[110px] text-center">{row.getValue("contactName")}</div>,
-    enableSorting: true,
-  },
-  {
-    accessorKey: "contactEmail",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="w-[180px]"
-      >
-        Contact Email
-        {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
-      </Button>
-    ),
-    cell: ({ row }) => <div className="text-start">{row.getValue("contactEmail")}</div>,
-    enableSorting: true,
-  },
-  {
-    accessorKey: "notes",
-    header: () => (
-      <Button
-        variant="ghost"
-        className="w-[200px]"
-      >
-        Notes
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="max-w-[200px] truncate" title={row.getValue("notes")}>
-        {row.getValue("notes")}
-      </div>
-    ),
-    enableSorting: false,
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const publisher = row.original;
-      return (
-        <div className="flex items-center justify-center space-x-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleViewPublisher(publisher)}
-            title="View"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleEditPublisher(publisher)}
-            title="Edit"
-          >
-            <Edit2Icon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setPublisherToDelete(publisher)}
-            title="Delete"
-          >
-            <Trash2Icon className="h-4 w-4" />
-          </Button>
-        </div>
-      );
-    },
-  },
-]
-
-
-
+type Action = {
+  icon: React.ReactNode;
+  label: string;
+  onClick: (publisher: Publisher) => void;
+};
 
 export function DataTable({
   initialData,
   isFormOpen,
   setIsFormOpen,
   onDataTableRefresh,
-  disableContextMenu = false, // Add this new prop with a default value of false
+  disableContextMenu = false,
+  showActions = true, 
+  actions = [], 
 }: {
   initialData: Publisher[];
   isFormOpen?: boolean;
   setIsFormOpen?: (isFormOpen: boolean) => void;
   onDataTableRefresh?: () => void;
-  disableContextMenu?: boolean; // Add this new prop
+  disableContextMenu?: boolean;
+  showActions?: boolean;
+  actions?: Action[];
 }) {
   const [data, setData] = useState<Publisher[]>(initialData);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -529,6 +186,349 @@ export function DataTable({
       contactEmail: "",
     },
   });
+
+  const columns: ColumnDef<Publisher>[] = [
+    {
+      id: "faviconAndDomain",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[250px] justify-start"
+        >
+          Domain
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      accessorFn: (row: Publisher & { url?: string }) => row.domainName || row.url || '',
+      cell: ({ row }) => {
+        const value = row.getValue("faviconAndDomain") as string
+        const domainName = extractDomainFromUrl(value)
+        const faviconUrl = getFaviconUrl(domainName)
+        const url = isValidUrl(value) ? value : `https://${domainName}`
+
+        return (
+          <div className="flex items-center">
+            <div className="w-4 h-4 mr-1 flex items-center justify-center bg-gray-200 rounded-full text-xs font-bold overflow-hidden">
+              <Image
+                src={faviconUrl}
+                alt={`${domainName} favicon`}
+                width={16}
+                height={16}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  const parentElement = e.currentTarget.parentElement;
+                  if (parentElement) {
+                    parentElement.innerHTML = getInitials(domainName);
+                  }
+                }}
+              />
+            </div>
+            <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline ml-2">
+              {domainName}
+            </a>
+          </div>
+        )
+      },
+      enableHiding: false,
+      enableSorting: true,
+      sortingFn: "alphanumeric",
+      sortDescFirst: false,
+    },
+    {
+      accessorKey: "niche",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[120px] justify-start"
+        >
+          Niche
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const niches = row.getValue("niche") as string;
+        return <div className="text-left">{niches.split(',').map(niche => niche.trim()).join(', ')}</div>;
+      },
+      enableSorting: true,
+    },
+    {
+      accessorKey: "domainRating",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[80px]"
+        >
+          DR
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      cell: ({ row }) => <div className="text-center">{(row.getValue("domainRating") as number).toFixed(0)}</div>,
+      enableSorting: true,
+    },
+    {
+      accessorKey: "domainAuthority",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[80px]"
+        >
+          DA
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      cell: ({ row }) => <div className="text-center">{(row.getValue("domainAuthority") as number).toFixed(0)}</div>,
+      enableSorting: true,
+    },
+    {
+      accessorKey: "domainTraffic",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[120px]"
+        >
+          Traffic
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      cell: ({ row }) => <div className="text-center">{(row.getValue("domainTraffic") as number).toLocaleString()}</div>,
+      enableSorting: true,
+    },
+    {
+      accessorKey: "trafficLocation",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[120px] flex items-center justify-between"
+        >
+          Traffic Location
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div className="text-center">{row.getValue("trafficLocation")}</div>,
+      enableSorting: true,
+    },
+    {
+      accessorKey: "spamScore",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[120px]"
+        >
+          Spam Score
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      cell: ({ row }) => <div className="text-center">{row.getValue("spamScore")}%</div>,
+      enableSorting: true,
+    },
+    {
+      accessorKey: "linkInsertionPrice",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[180px]"
+        >
+          Link Insertion Price
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      cell: ({ row }) => <div className="text-center">{row.original.currency || ""}{(row.getValue("linkInsertionPrice") as number).toLocaleString()}</div>,
+      enableSorting: true,
+    },
+    {
+      accessorKey: "guestPostPrice",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[160px]"
+        >
+          Guest Post Price
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      cell: ({ row }) => <div className="text-center">{row.original.currency || ""}{(row.getValue("guestPostPrice") as number).toLocaleString()}</div>,
+      enableSorting: true,
+    },
+    {
+      accessorKey: "linkInsertionGuidelines",
+      header: () => (
+        <Button
+          variant="ghost"
+          className="w-[200px]"
+        >
+          Link Insertion Guidelines
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="max-w-[200px] truncate" title={row.getValue("linkInsertionGuidelines")}>
+          {row.getValue("linkInsertionGuidelines")}
+        </div>
+      ),
+      enableSorting: false,
+    },
+    {
+      accessorKey: "guestPostGuidelines",
+      header: () => (
+        <Button
+          variant="ghost"
+          className="w-[200px]"
+        >
+          Guest Post Guidelines
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="max-w-[200px] truncate" title={row.getValue("guestPostGuidelines")}>
+          {row.getValue("guestPostGuidelines")}
+        </div>
+      ),
+      enableSorting: false,
+    },
+    {
+      accessorKey: "metricsLastUpdate",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[160px]"
+        >
+          Metrics Last Update
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const metricsLastUpdate = row.getValue("metricsLastUpdate");
+        if (metricsLastUpdate && !isNaN(new Date(metricsLastUpdate as string).getTime())) {
+          return (
+            <div className="w-[110px] text-center">
+            {format(new Date(metricsLastUpdate as string), 'MMM d, yyyy')}
+          </div>
+          );
+        }
+        return <div className="max-w-[100px]">N/A</div>;
+      },
+      enableSorting: true,
+    },
+    {
+      accessorKey: "isReseller",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[100px]"
+        >
+          Reseller
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.getValue("isReseller") ? "Yes" : "No"}
+        </div>
+      ),
+      enableSorting: true,
+    },
+    {
+      accessorKey: "acceptsGreyNiche",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[100px]"
+        >
+          Accepts Grey Niche
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.getValue("acceptsGreyNiche") ? "Yes" : "No"}
+        </div>
+      ),
+      enableSorting: true,
+    },
+    {
+      accessorKey: "contactName",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[140px]"
+        >
+          Contact Name
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      cell: ({ row }) => <div className="w-[110px] text-center">{row.getValue("contactName")}</div>,
+      enableSorting: true,
+    },
+    {
+      accessorKey: "contactEmail",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="w-[180px]"
+        >
+          Contact Email
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
+        </Button>
+      ),
+      cell: ({ row }) => <div className="text-start">{row.getValue("contactEmail")}</div>,
+      enableSorting: true,
+    },
+    {
+      accessorKey: "notes",
+      header: () => (
+        <Button
+          variant="ghost"
+          className="w-[200px]"
+        >
+          Notes
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="max-w-[200px] truncate" title={row.getValue("notes")}>
+          {row.getValue("notes")}
+        </div>
+      ),
+      enableSorting: false,
+    },
+    ...(showActions
+      ? [
+          {
+            id: "actions",
+            header: "",
+            cell: ({ row }: { row: Row<Publisher> }) => {
+              const publisher = row.original;
+              return (
+                <div className="flex items-center justify-center space-x-2">
+                  {actions.map((action, index) => (
+                    <Button
+                      key={index}
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => action.onClick(publisher)}
+                      title={action.label}
+                    >
+                      {action.icon}
+                    </Button>
+                  ))}
+                </div>
+              );
+            },
+          },
+        ]
+      : []),
+  ];
 
   const table = useReactTable({
     data,
@@ -745,7 +745,7 @@ export function DataTable({
         <TableCell
           key={cell.id}
           className={`px-4 py-3 ${
-            cell.column.id === "actions" ? "sticky right-0 bg-white shadow-sm z-10" : ""
+            cell.column.id === "actions" ? "sticky right-0 bg-background shadow-sm z-10" : ""
           }`}
         >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -1207,14 +1207,16 @@ export function DataTable({
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
                 .map((column) => {
+                  // Don't render the checkbox item for the actions column if showActions is false
+                  if (!showActions && column.id === "actions") {
+                    return null;
+                  }
                   return (
                     <DropdownMenuCheckboxItem
                       key={column.id}
                       className="capitalize"
                       checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
+                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
                     >
                       {column.id
                         .split(/(?=[A-Z])/)
@@ -1236,7 +1238,7 @@ export function DataTable({
                   <TableHead
                     key={header.id}
                     className={`px-4 py-3 ${
-                      header.id === "actions" ? "sticky right-0 bg-white shadow-sm z-10" : ""
+                      header.id === "actions" ? "sticky right-0 bg-background shadow-sm z-10" : ""
                     }`}
                   >
                     {header.isPlaceholder
@@ -1260,7 +1262,7 @@ export function DataTable({
                     <ContextMenuTrigger asChild>
                       {renderTableRow(row)}
                     </ContextMenuTrigger>
-                    <ContextMenuContent className="w-40">
+                    <ContextMenuContent className="w-auto">
                       <ContextMenuItem
                         onClick={() => handleViewPublisher(row.original)}
                       >

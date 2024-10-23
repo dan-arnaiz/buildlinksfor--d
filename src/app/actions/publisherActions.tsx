@@ -63,3 +63,17 @@ export async function deletePublisher(id: string): Promise<boolean> {
   revalidatePath('/')
   return true
 }
+
+
+
+export async function handleGetLinks(publisher: Publisher) {
+  console.log(publisher)
+}
+
+export async function handleBlacklist(publisher: Publisher) {
+  console.log(publisher)
+}
+
+export async function handleViewRejectedSites(publisher: Publisher) {
+  console.log(publisher)
+}
