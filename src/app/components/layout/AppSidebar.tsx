@@ -145,9 +145,9 @@ export function AppSidebar({
                         className={cn(
                           "w-full justify-center px-3 py-2 text-sm",
                           isParentActive(item) &&
-                            "bg-secondary text-secondary-foreground font-medium",
+                            "bg-primary text-primary-foreground font-medium",
                           !isParentActive(item) &&
-                            "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
+                            "text-muted-foreground hover:bg-primary/80 hover:text-primary-foreground"
                         )}
                       >
                         <item.icon className="h-4 w-4 flex-shrink-0" />
@@ -162,8 +162,8 @@ export function AppSidebar({
                               className={cn(
                                 "flex items-center gap-3 rounded-md px-3 py-2 transition-colors text-sm",
                                 isActive(subItem.href)
-                                  ? "bg-secondary text-secondary-foreground font-medium"
-                                  : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
+                                  ? "bg-primary text-primary-foreground font-medium"
+                                  : "text-muted-foreground hover:bg-primary/80 hover:text-primary-foreground"
                               )}
                               onClick={() => {
                                 setOpenPopover(null);
@@ -191,9 +191,9 @@ export function AppSidebar({
                         className={cn(
                           "w-full justify-start px-3 py-2 text-sm",
                           isParentActive(item) &&
-                            "bg-secondary text-secondary-foreground font-medium",
+                            "bg-primary text-primary-foreground font-medium",
                           !isParentActive(item) &&
-                            "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
+                            "text-muted-foreground hover:bg-primary/80 hover:text-primary-foreground"
                         )}
                       >
                         <item.icon className="h-4 w-4 flex-shrink-0 mr-2" />
@@ -216,8 +216,8 @@ export function AppSidebar({
                               className={cn(
                                 "flex items-center gap-3 rounded-md px-3 py-2 transition-colors text-sm",
                                 isActive(subItem.href)
-                                  ? "bg-secondary text-secondary-foreground font-medium"
-                                  : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
+                                  ? "bg-primary text-primary-foreground font-medium"
+                                  : "text-muted-foreground hover:bg-primary/80 hover:text-primary-foreground"
                               )}
                               onClick={handleItemClick}
                             >
@@ -236,8 +236,8 @@ export function AppSidebar({
                   className={cn(
                     "flex items-center gap-3 rounded-md px-3 py-2 transition-colors text-sm",
                     isActive(item.href)
-                      ? "bg-secondary text-secondary-foreground font-medium"
-                      : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground",
+                      ? "bg-primary text-primary-foreground font-medium"
+                      : "text-muted-foreground hover:bg-primary/80 hover:text-primary-foreground",
                     isCollapsed && "justify-center"
                   )}
                   title={isCollapsed ? item.label : undefined}
@@ -246,7 +246,7 @@ export function AppSidebar({
                   <item.icon
                     className={cn(
                       "h-4 w-4 flex-shrink-0",
-                      isActive(item.href) && "text-secondary-foreground"
+                      isActive(item.href) && "text-primary-foreground"
                     )}
                   />
                   {!isCollapsed && <span>{item.label}</span>}

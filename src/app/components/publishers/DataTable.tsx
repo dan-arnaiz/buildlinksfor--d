@@ -1335,8 +1335,8 @@ export function DataTable({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between py-4">
-        <p className="text-sm text-gray-500 italic">
+      <div className="flex flex-col sm:flex-row items-center justify-between py-4 space-y-4 sm:space-y-0">
+        <p className="text-sm text-gray-500 italic text-center sm:text-left">
           Note: Metrics data may not be up to date. Please double-check.
         </p>
         <div className="flex items-center space-x-2">
