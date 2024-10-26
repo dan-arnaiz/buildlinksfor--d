@@ -23,9 +23,8 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
-import { PlusIcon, Pencil, Trash2, Eye, Globe } from "lucide-react";
+import { PlusIcon, Pencil, Trash2, Eye } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Domain } from "@/app/types/Domains";
@@ -62,10 +61,14 @@ import { formSchema } from "@/app/types/Domains";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { getFaviconUrl, getInitials } from "@/app/utils/domainUtils";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 import { handleViewRejectedSites } from "@/app/actions/publisherActions";
 
-  
 export default function DomainList() {
   const [domains, setDomains] = useState<Domain[]>([]);
   const [filteredDomains, setFilteredDomains] = useState<Domain[]>([]);
@@ -99,11 +102,6 @@ export default function DomainList() {
   useEffect(() => {
     fetchData();
   }, []);
-
-  useEffect(() => {
-    filterDomains();
-  }, [domains, showArchived, selectedNiches]);
-
   const fetchData = async () => {
     const fetchedDomains = await fetchDomains();
     setDomains(fetchedDomains);
@@ -127,18 +125,22 @@ export default function DomainList() {
     setKeywords(uniqueKeywords);
   };
 
-  const filterDomains = () => {
-    let filtered = domains;
-    if (!showArchived) {
-      filtered = filtered.filter((domain) => !domain.archived);
-    }
-    if (selectedNiches.length > 0) {
-      filtered = filtered.filter((domain) =>
-        selectedNiches.some((niche) => domain.niches.includes(niche))
-      );
-    }
-    setFilteredDomains(filtered);
-  };
+  useEffect(() => {
+    const filterDomains = () => {
+      let filtered = domains;
+      if (!showArchived) {
+        filtered = filtered.filter((domain) => !domain.archived);
+      }
+      if (selectedNiches.length > 0) {
+        filtered = filtered.filter((domain) =>
+          selectedNiches.some((niche) => domain.niches.includes(niche))
+        );
+      }
+      setFilteredDomains(filtered);
+    };
+
+    filterDomains();
+  }, [domains, showArchived, selectedNiches]);
 
   const handleOpenDialog = (domain?: Domain) => {
     setEditingDomain(domain || null);
@@ -247,6 +249,7 @@ export default function DomainList() {
       handleCloseDialog();
       await fetchData();
     } catch (error) {
+      console.error("Failed to save domain:", error);
       toast({
         title: "Error",
         description: "Failed to save domain",
@@ -264,6 +267,7 @@ export default function DomainList() {
         await fetchData(); // Refresh the data after deleting
       }
     } catch (error) {
+      console.error("Failed to delete domain:", error);
       toast({
         title: "Error",
         description: "Failed to delete domain",
@@ -272,8 +276,6 @@ export default function DomainList() {
     }
     handleCloseDeleteDialog();
   };
-
-
 
   return (
     <div className="space-y-4">
@@ -608,9 +610,12 @@ export default function DomainList() {
                               height={16}
                               onError={(e) => {
                                 e.currentTarget.onerror = null;
-                                const parentElement = e.currentTarget.parentElement;
+                                const parentElement =
+                                  e.currentTarget.parentElement;
                                 if (parentElement) {
-                                  parentElement.innerHTML = getInitials(domain.name);
+                                  parentElement.innerHTML = getInitials(
+                                    domain.name
+                                  );
                                 }
                               }}
                             />
@@ -686,14 +691,16 @@ export default function DomainList() {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Button variant="ghost" size="icon" onClick={() => handleViewRejectedSites(domain)}>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleViewRejectedSites(domain)}
+                              >
                                 <Eye className="h-4 w-4" />
-                          </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            View Rejected Sites
-                          </TooltipContent>
-                        </Tooltip>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>View Rejected Sites</TooltipContent>
+                          </Tooltip>
                         </TooltipProvider>
                       </TableCell>
                     </TableRow>

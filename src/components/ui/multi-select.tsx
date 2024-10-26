@@ -125,10 +125,7 @@ interface MultiSelectProps
   value?: string[];
 }
 
-export const MultiSelect = React.forwardRef<
-  HTMLButtonElement,
-  MultiSelectProps
->(
+export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
   (
     {
       options,
@@ -139,7 +136,6 @@ export const MultiSelect = React.forwardRef<
       animation = 0,
       maxCount = 3,
       modalPopover = false,
-      asChild = false,
       className,
       createable = false,
       onCreateOption,
@@ -147,8 +143,9 @@ export const MultiSelect = React.forwardRef<
     },
     ref
   ) => {
-    const [selectedValues, setSelectedValues] =
-      React.useState<string[]>(value || []);
+    const [selectedValues, setSelectedValues] = React.useState<string[]>(
+      value || []
+    );
 
     React.useEffect(() => {
       if (value !== undefined) {
@@ -164,7 +161,11 @@ export const MultiSelect = React.forwardRef<
       event: React.KeyboardEvent<HTMLInputElement>
     ) => {
       if (event.key === "Enter") {
-        if (createable && inputValue && !options.some(opt => opt.value === inputValue)) {
+        if (
+          createable &&
+          inputValue &&
+          !options.some((opt) => opt.value === inputValue)
+        ) {
           if (onCreateOption) {
             onCreateOption(inputValue);
           }
@@ -329,13 +330,16 @@ export const MultiSelect = React.forwardRef<
                       if (onCreateOption) {
                         onCreateOption(inputValue);
                       }
-                      const newOption = { label: inputValue, value: inputValue };
+                      const newOption = {
+                        label: inputValue,
+                        value: inputValue,
+                      };
                       options.push(newOption);
                       toggleOption(inputValue);
                       setInputValue("");
                     }}
                   >
-                    Create "{inputValue}"
+                    Create &quot;{inputValue}&quot;
                   </CommandItem>
                 ) : (
                   "No results found."

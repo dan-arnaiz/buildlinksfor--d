@@ -7,8 +7,14 @@ import { Publisher } from "@/app/types/Publisher";
 import { fetchPublishers, handleBlacklist, handleGetLinks } from "@/app/actions/publisherActions";
 import { DataTable } from "@/app/components/publishers/DataTable";
 import Loading from "@/components/ui/loading";
-import { motion } from "framer-motion";
-import { Search, List, ChevronDown, ChevronUp, LinkIcon, Link2, LucideLink, BanIcon, PlusIcon, CheckCheckIcon, XIcon } from "lucide-react";
+import {
+  Search,
+  List,
+  ChevronDown,
+  ChevronUp,
+  CheckCheckIcon,
+  XIcon,
+} from "lucide-react";
 
 export default function FindPublishers() {
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);

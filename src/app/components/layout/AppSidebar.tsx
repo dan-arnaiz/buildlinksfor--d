@@ -42,6 +42,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+interface MenuItem {
+  href: string;
+  icon: React.ElementType;
+  label: string;
+  subItems?: MenuItem[];
+}
+
 export function AppSidebar({
   className,
   isMobile = false,
@@ -57,11 +64,11 @@ export function AppSidebar({
   const pathname = usePathname();
 
   const isActive = (path: string) => pathname === path;
-  const isParentActive = (item: any) =>
-    item.subItems?.some((subItem: any) => isActive(subItem.href)) ||
+  const isParentActive = (item: MenuItem) =>
+    item.subItems?.some((subItem: MenuItem) => isActive(subItem.href)) ||
     isActive(item.href);
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     { href: "/", icon: Home, label: "Dashboard" },
     {
       href: "#",

@@ -1,34 +1,6 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Publisher, formSchema } from "../../types/Publisher";
-import {
-  addPublisher,
-  updatePublisher,
-  deletePublisher,
-  fetchPublishers,
-} from "../../actions/publisherActions";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
-import { MultiSelect } from "@/components/ui/multi-select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button, ButtonProps } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { getFaviconUrl, getInitials } from "@/app/utils/domainUtils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,12 +11,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Form,
   FormControl,
@@ -53,39 +39,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
-import {
-  SearchIcon,
-  Edit2Icon,
-  Trash2Icon,
-  ArrowUpDown,
-  Eye,
-  SearchXIcon,
-  MoreHorizontal,
-  LinkIcon,
-  BanIcon,
-} from "lucide-react";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getPaginationRowModel,
-  getSortedRowModel,
-  SortingState,
-  getFilteredRowModel,
-  VisibilityState,
-  Row,
-} from "@tanstack/react-table";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { format } from "date-fns";
+import { MultiSelect } from "@/components/ui/multi-select";
 import {
   Select,
   SelectContent,
@@ -93,23 +48,62 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { currencies } from "../../api/publishers/currencies";
-import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  Row,
+  SortingState,
+  useReactTable,
+  VisibilityState,
+  Cell,
+} from "@tanstack/react-table";
+import { format } from "date-fns";
+import {
+  ArrowUpDown,
+  Edit2Icon,
+  Eye,
+  SearchIcon,
+  SearchXIcon,
+  Trash2Icon,
+} from "lucide-react";
 import Image from "next/image";
-import { getFaviconUrl, getInitials } from "@/app/utils/domainUtils";
-import { DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-
-
-
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import {
+  addPublisher,
+  deletePublisher,
+  fetchPublishers,
+  updatePublisher,
+} from "../../actions/publisherActions";
+import { currencies } from "../../api/publishers/currencies";
+import { formSchema, Publisher } from "../../types/Publisher";
 
 function extractDomainFromUrl(url: string): string {
-  if (!url) return '';
+  if (!url) return "";
   try {
-    const fullUrl = url.startsWith('http') ? url : `https://${url}`
-    const hostname = new URL(fullUrl).hostname
-    return hostname.startsWith('www.') ? hostname.slice(4) : hostname
+    const fullUrl = url.startsWith("http") ? url : `https://${url}`;
+    const hostname = new URL(fullUrl).hostname;
+    return hostname.startsWith("www.") ? hostname.slice(4) : hostname;
   } catch {
-    return url
+    return url;
   }
 }
 
@@ -121,7 +115,6 @@ function isValidUrl(string: string) {
     return false;
   }
 }
-
 
 type Action = {
   icon: React.ReactNode;
@@ -135,8 +128,8 @@ export function DataTable({
   setIsFormOpen,
   onDataTableRefresh,
   disableContextMenu = false,
-  showActions = true, 
-  actions = [], 
+  showActions = true,
+  actions = [],
 }: {
   initialData: Publisher[];
   isFormOpen?: boolean;
@@ -159,9 +152,6 @@ export function DataTable({
   );
   const router = useRouter();
   const { toast } = useToast();
-  const [selectedPublisher, setSelectedPublisher] = useState<Publisher | null>(
-    null
-  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -200,12 +190,13 @@ export function DataTable({
           {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
         </Button>
       ),
-      accessorFn: (row: Publisher & { url?: string }) => row.domainName || row.url || '',
+      accessorFn: (row: Publisher & { url?: string }) =>
+        row.domainName || row.url || "",
       cell: ({ row }) => {
-        const value = row.getValue("faviconAndDomain") as string
-        const domainName = extractDomainFromUrl(value)
-        const faviconUrl = getFaviconUrl(domainName)
-        const url = isValidUrl(value) ? value : `https://${domainName}`
+        const value = row.getValue("faviconAndDomain") as string;
+        const domainName = extractDomainFromUrl(value);
+        const faviconUrl = getFaviconUrl(domainName);
+        const url = isValidUrl(value) ? value : `https://${domainName}`;
 
         return (
           <div className="flex items-center">
@@ -224,11 +215,16 @@ export function DataTable({
                 }}
               />
             </div>
-            <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline ml-2">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline ml-2"
+            >
               {domainName}
             </a>
           </div>
-        )
+        );
       },
       enableHiding: false,
       enableSorting: true,
@@ -249,7 +245,14 @@ export function DataTable({
       ),
       cell: ({ row }) => {
         const niches = row.getValue("niche") as string;
-        return <div className="text-left">{niches.split(',').map(niche => niche.trim()).join(', ')}</div>;
+        return (
+          <div className="text-left">
+            {niches
+              .split(",")
+              .map((niche) => niche.trim())
+              .join(", ")}
+          </div>
+        );
       },
       enableSorting: true,
     },
@@ -265,7 +268,11 @@ export function DataTable({
           {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
         </Button>
       ),
-      cell: ({ row }) => <div className="text-center">{(row.getValue("domainRating") as number).toFixed(0)}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          {(row.getValue("domainRating") as number).toFixed(0)}
+        </div>
+      ),
       enableSorting: true,
     },
     {
@@ -280,7 +287,11 @@ export function DataTable({
           {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
         </Button>
       ),
-      cell: ({ row }) => <div className="text-center">{(row.getValue("domainAuthority") as number).toFixed(0)}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          {(row.getValue("domainAuthority") as number).toFixed(0)}
+        </div>
+      ),
       enableSorting: true,
     },
     {
@@ -295,7 +306,11 @@ export function DataTable({
           {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
         </Button>
       ),
-      cell: ({ row }) => <div className="text-center">{(row.getValue("domainTraffic") as number).toLocaleString()}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          {(row.getValue("domainTraffic") as number).toLocaleString()}
+        </div>
+      ),
       enableSorting: true,
     },
     {
@@ -310,7 +325,9 @@ export function DataTable({
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => <div className="text-center">{row.getValue("trafficLocation")}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("trafficLocation")}</div>
+      ),
       enableSorting: true,
     },
     {
@@ -325,7 +342,9 @@ export function DataTable({
           {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
         </Button>
       ),
-      cell: ({ row }) => <div className="text-center">{row.getValue("spamScore")}%</div>,
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("spamScore")}%</div>
+      ),
       enableSorting: true,
     },
     {
@@ -340,7 +359,12 @@ export function DataTable({
           {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
         </Button>
       ),
-      cell: ({ row }) => <div className="text-center">{row.original.currency || ""}{(row.getValue("linkInsertionPrice") as number).toLocaleString()}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.original.currency || ""}
+          {(row.getValue("linkInsertionPrice") as number).toLocaleString()}
+        </div>
+      ),
       enableSorting: true,
     },
     {
@@ -355,21 +379,26 @@ export function DataTable({
           {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
         </Button>
       ),
-      cell: ({ row }) => <div className="text-center">{row.original.currency || ""}{(row.getValue("guestPostPrice") as number).toLocaleString()}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.original.currency || ""}
+          {(row.getValue("guestPostPrice") as number).toLocaleString()}
+        </div>
+      ),
       enableSorting: true,
     },
     {
       accessorKey: "linkInsertionGuidelines",
       header: () => (
-        <Button
-          variant="ghost"
-          className="w-[200px]"
-        >
+        <Button variant="ghost" className="w-[200px]">
           Link Insertion Guidelines
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="max-w-[200px] truncate" title={row.getValue("linkInsertionGuidelines")}>
+        <div
+          className="max-w-[200px] truncate"
+          title={row.getValue("linkInsertionGuidelines")}
+        >
           {row.getValue("linkInsertionGuidelines")}
         </div>
       ),
@@ -378,15 +407,15 @@ export function DataTable({
     {
       accessorKey: "guestPostGuidelines",
       header: () => (
-        <Button
-          variant="ghost"
-          className="w-[200px]"
-        >
+        <Button variant="ghost" className="w-[200px]">
           Guest Post Guidelines
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="max-w-[200px] truncate" title={row.getValue("guestPostGuidelines")}>
+        <div
+          className="max-w-[200px] truncate"
+          title={row.getValue("guestPostGuidelines")}
+        >
           {row.getValue("guestPostGuidelines")}
         </div>
       ),
@@ -406,11 +435,14 @@ export function DataTable({
       ),
       cell: ({ row }) => {
         const metricsLastUpdate = row.getValue("metricsLastUpdate");
-        if (metricsLastUpdate && !isNaN(new Date(metricsLastUpdate as string).getTime())) {
+        if (
+          metricsLastUpdate &&
+          !isNaN(new Date(metricsLastUpdate as string).getTime())
+        ) {
           return (
             <div className="w-[110px] text-center">
-            {format(new Date(metricsLastUpdate as string), 'MMM d, yyyy')}
-          </div>
+              {format(new Date(metricsLastUpdate as string), "MMM d, yyyy")}
+            </div>
           );
         }
         return <div className="max-w-[100px]">N/A</div>;
@@ -467,7 +499,11 @@ export function DataTable({
           {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
         </Button>
       ),
-      cell: ({ row }) => <div className="w-[110px] text-center">{row.getValue("contactName")}</div>,
+      cell: ({ row }) => (
+        <div className="w-[110px] text-center">
+          {row.getValue("contactName")}
+        </div>
+      ),
       enableSorting: true,
     },
     {
@@ -482,16 +518,15 @@ export function DataTable({
           {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
         </Button>
       ),
-      cell: ({ row }) => <div className="text-start">{row.getValue("contactEmail")}</div>,
+      cell: ({ row }) => (
+        <div className="text-start">{row.getValue("contactEmail")}</div>
+      ),
       enableSorting: true,
     },
     {
       accessorKey: "notes",
       header: () => (
-        <Button
-          variant="ghost"
-          className="w-[200px]"
-        >
+        <Button variant="ghost" className="w-[200px]">
           Notes
         </Button>
       ),
@@ -739,13 +774,15 @@ export function DataTable({
   };
 
   // Helper function to render table row
-  const renderTableRow = (row: any) => (
+  const renderTableRow = (row: Row<Publisher>) => (
     <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-      {row.getVisibleCells().map((cell: any) => (
+      {row.getVisibleCells().map((cell: Cell<Publisher, unknown>) => (
         <TableCell
           key={cell.id}
           className={`px-4 py-3 ${
-            cell.column.id === "actions" ? "sticky right-0 bg-background shadow-sm z-10" : ""
+            cell.column.id === "actions"
+              ? "sticky right-0 bg-background shadow-sm z-10"
+              : ""
           }`}
         >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -753,12 +790,6 @@ export function DataTable({
       ))}
     </TableRow>
   );
-
-  const handleGetLinks = (publisher: Publisher) => {
-    // Implement the logic to get links for the publisher
-    console.log("Get links for:", publisher)
-    // You might want to navigate to a new page or open a modal here
-  }
 
   return (
     <div>
@@ -1216,7 +1247,9 @@ export function DataTable({
                       key={column.id}
                       className="capitalize"
                       checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
                     >
                       {column.id
                         .split(/(?=[A-Z])/)
@@ -1238,7 +1271,9 @@ export function DataTable({
                   <TableHead
                     key={header.id}
                     className={`px-4 py-3 ${
-                      header.id === "actions" ? "sticky right-0 bg-background shadow-sm z-10" : ""
+                      header.id === "actions"
+                        ? "sticky right-0 bg-background shadow-sm z-10"
+                        : ""
                     }`}
                   >
                     {header.isPlaceholder
@@ -1254,7 +1289,7 @@ export function DataTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map((row) =>
                 disableContextMenu ? (
                   renderTableRow(row)
                 ) : (
@@ -1284,7 +1319,7 @@ export function DataTable({
                     </ContextMenuContent>
                   </ContextMenu>
                 )
-              ))
+              )
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24">
@@ -1349,4 +1384,4 @@ export function DataTable({
   );
 }
 
-export default DataTable
+export default DataTable;

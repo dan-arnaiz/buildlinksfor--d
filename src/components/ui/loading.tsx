@@ -49,7 +49,7 @@ export default function Loading({
         const endNodeIndex = Math.floor(Math.random() * 8);
         return [isFromCentral, startNodeIndex, endNodeIndex];
       });
-      setRandomLinks(links);
+      setRandomLinks(links as number[][]);
     };
 
     generateRandomLinks();
