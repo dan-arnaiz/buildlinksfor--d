@@ -251,53 +251,66 @@ export function AppSidebar({
           ))}
         </ul>
       </nav>
-      <div className="border-t p-4">
+      <div className="border-t p-2 md:p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-full justify-center px-2">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full min-h-[40px] md:min-h-[48px]",
+                isCollapsed
+                  ? "px-0 hover:bg-transparent hover:text-inherit"
+                  : "justify-start px-2"
+              )}
+            >
+              <div
+                className={cn(
+                  "flex items-center w-full overflow-hidden",
+                  isCollapsed ? "justify-center" : "gap-2 md:gap-3"
+                )}
+              >
+                <Avatar className="h-5 w-5 md:h-6 md:w-6 flex-shrink-0">
                   <AvatarImage
                     src="/avatars/user-avatar.jpg"
                     alt="User avatar"
-                    width={32}
-                    height={32}
                   />
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
                 {!isCollapsed && (
-                  <div className="flex flex-col items-start">
-                    <p className="text-sm font-medium leading-none">John Doe</p>
-                    <p className="text-xs text-muted-foreground">
-                      john.doe@example.com
-                    </p>
-                  </div>
-                )}
-                {!isCollapsed && (
-                  <ChevronsUpDown className="ml-auto h-4 w-4 opacity-50" />
+                  <>
+                    <div className="flex flex-col items-start min-w-0">
+                      <p className="text-[11px] md:text-xs font-medium leading-none truncate w-full">
+                        John Doe
+                      </p>
+                      <p className="text-[9px] md:text-[11px] text-muted-foreground hidden md:block truncate w-full">
+                        john.doe@example.com
+                      </p>
+                    </div>
+                    <ChevronsUpDown className="ml-auto h-3 w-3 opacity-50 flex-shrink-0" />
+                  </>
                 )}
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
+          <DropdownMenuContent align="end" className="w-44 md:w-52">
+            <DropdownMenuItem className="text-xs md:text-sm">
+              <Settings className="mr-2 h-3 w-3" />
               <span>Profile Settings</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Bell className="mr-2 h-4 w-4" />
+            <DropdownMenuItem className="text-xs md:text-sm">
+              <Bell className="mr-2 h-3 w-3" />
               <span>Notifications</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <CreditCard className="mr-2 h-4 w-4" />
+            <DropdownMenuItem className="text-xs md:text-sm">
+              <CreditCard className="mr-2 h-3 w-3" />
               <span>Billing</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Zap className="mr-2 h-4 w-4" />
+            <DropdownMenuItem className="text-xs md:text-sm">
+              <Zap className="mr-2 h-3 w-3" />
               <span>Upgrade Plan</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <LogOut className="mr-2 h-4 w-4" />
+            <DropdownMenuItem className="text-xs md:text-sm">
+              <LogOut className="mr-2 h-3 w-3" />
               <span>Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
