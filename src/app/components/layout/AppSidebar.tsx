@@ -41,13 +41,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MenuItem } from "@/app/types/MenuItem";
 
-interface MenuItem {
-  href: string;
-  icon: React.ElementType;
-  label: string;
-  subItems?: MenuItem[];
-}
 
 export function AppSidebar({
   className,

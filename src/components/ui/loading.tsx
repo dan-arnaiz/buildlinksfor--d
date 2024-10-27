@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
-interface LoadingProps {
+type LoadingProps = {
   title?: string;
   subtitle?: string;
   expectedDuration?: number;
   primaryColor?: string;
   secondaryColor?: string;
   showProgressBar?: boolean;
-}
+};
 
 export default function Loading({
   title = "Loading Data",
