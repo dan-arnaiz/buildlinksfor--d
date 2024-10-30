@@ -322,7 +322,7 @@ export function DataTable({
           className="w-[120px] flex items-center justify-between"
         >
           Traffic Location
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
         </Button>
       ),
       cell: ({ row }) => (
