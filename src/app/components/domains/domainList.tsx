@@ -68,6 +68,9 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { handleViewRejectedSites } from "@/app/actions/publisherActions";
+import WithSidebar from '../../hoc/WithSidebar';
+
+
 
 export default function DomainList() {
   const [domains, setDomains] = useState<Domain[]>([]);
