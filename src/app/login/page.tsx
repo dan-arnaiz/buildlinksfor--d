@@ -77,8 +77,8 @@ export default function LoginForm() {
     <main className="flex justify-center items-center min-h-screen">
       <Card className="w-[380px]">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>Login to your account</CardDescription>
+          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardDescription>Enter your email and password to login.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>

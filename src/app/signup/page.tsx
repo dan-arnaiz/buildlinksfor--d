@@ -48,23 +48,6 @@ export default function Register() {
     },
   });
 
-  //   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-  //     setServerError(null);
-  //     const response = await registerUser({
-  //       email: data.email,
-  //       password: data.password,
-  //       passwordConfirm: data.passwordConfirm,
-  //     });
-
-  //     if (response.error) {
-  //       setServerError(response.message);
-  //     } else {
-  //       // Handle successful registration (e.g., show a success message or redirect)
-  //       router.push("/register/confirmation");
-  //       console.log(response.message);
-  //     }
-  //     console.log("hey: ", response);
-  //   };
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     setServerError(null);
     setIsLoading(true); // Set loading to true when submission starts
@@ -93,8 +76,8 @@ export default function Register() {
     <main className="flex justify-center items-center min-h-screen">
       <Card className="w-[380px]">
         <CardHeader>
-          <CardTitle>Register</CardTitle>
-          <CardDescription>Register for a new account</CardDescription>
+          <CardTitle className="text-2xl">Create an Account</CardTitle>
+          <CardDescription>Signup for a new account.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
